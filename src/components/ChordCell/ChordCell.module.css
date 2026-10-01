@@ -1,0 +1,45 @@
+.cell {
+  background: var(--color-sheet);
+  text-align: center;
+  padding: 4px 2px;
+}
+
+.chord {
+  font-weight: 700;
+  font-size: 21px;
+  width: 100%;
+  padding: 8px 0;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background var(--duration-fast),
+    border-color var(--duration-fast);
+}
+
+.chord:hover {
+  background: var(--color-bg);
+  border-color: var(--color-line);
+}
+
+.major {
+  color: var(--color-major);
+}
+
+.minor {
+  color: var(--color-minor);
+}
+
+.diminished {
+  color: var(--color-dim);
+  font-weight: 500;
+  font-size: 17px;
+}
+
+.chord.open {
+  background: var(--color-ink);
+  border-color: var(--color-ink);
+  color: var(--color-sheet);
+}
