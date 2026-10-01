@@ -1,5 +1,5 @@
-import type { DegreeId, PresetId } from '../lib/music/degrees';
-import { getDegree, getPreset } from '../lib/music/degrees';
+import type { DegreeId } from '../lib/music/degrees';
+import { getDegree } from '../lib/music/degrees';
 import type { ChordQuality } from '../lib/music/notes';
 import type { SuggestionId } from '../lib/music/sequence';
 
@@ -16,11 +16,6 @@ export const LANGUAGE_DIR: Readonly<Record<Language, 'rtl' | 'ltr'>> = { he: 'rt
 /** Each language's name in itself, for the language switch. */
 export const LANGUAGE_NAMES: Readonly<Record<Language, string>> = { he: 'עברית', en: 'English' };
 
-export interface PresetLabel {
-  name?: string;
-  sequence?: string;
-}
-
 /** Every user-facing string. Adding a key here makes TypeScript require it in both languages. */
 export interface Messages {
   appTitle: string;
@@ -28,11 +23,6 @@ export interface Messages {
   languageLabel: string;
   instrumentLabel: string;
   instruments: Record<'guitar' | 'piano', string>;
-  pickerLabel: string;
-  presetsLabel: string;
-  /** Preset button text: a name and/or a degree sequence that always reads left to right. */
-  presets: Record<PresetId, PresetLabel>;
-  lastDegreeHint: string;
   sequence: {
     label: string;
     placeholder: string;
@@ -43,6 +33,14 @@ export interface Messages {
     duplicates: string;
     suggestionsLabel: string;
     suggestions: Record<SuggestionId, string>;
+  };
+  /** Shown when the sequence box gets chords instead of numbers. */
+  converter: {
+    errorInvalid: (chords: string) => string;
+    noKey: string;
+    inKey: (key: string) => string;
+    outsideKey: string;
+    otherKeys: string;
   };
   tableCaption: string;
   keyColumn: string;
@@ -72,32 +70,30 @@ const he: Messages = {
   languageLabel: 'שפה',
   instrumentLabel: 'כלי',
   instruments: { guitar: 'גיטרה', piano: 'פסנתר' },
-  pickerLabel: 'אילו אקורדים להציג',
-  presetsLabel: 'בחירה מהירה',
-  presets: {
-    all: { name: getPreset('all').label },
-    oneFourFive: { sequence: getPreset('oneFourFive').label },
-    major: { name: getPreset('major').label },
-    minor: { name: getPreset('minor').label },
-    pop: { name: 'פופ', sequence: '1·5·6·4' },
-  },
-  lastDegreeHint: 'חייב להישאר לפחות אקורד אחד בטבלה',
   sequence: {
     label: 'רצף משלך',
-    placeholder: 'לדוגמה 1-6-4-5',
-    help: 'ספרות 1 עד 7. העמודות יוצגו בסדר שהקלדת.',
+    placeholder: 'לדוגמה 1-6-4-5 או Am F C G',
+    help: 'ספרות 1 עד 7, או אקורדים שיומרו למספרים לפי הסולם שלהם. העמודות יוצגו בסדר שהקלדת.',
     submit: 'הצג',
-    errorEmpty: 'הקלד לפחות ספרה אחת בין 1 ל-7',
-    errorInvalid: (characters) => `אפשר להשתמש רק בספרות 1 עד 7 (לא: ${characters})`,
+    errorEmpty: 'הקלד ספרות 1 עד 7 או אקורדים',
+    errorInvalid: (characters) => `אפשר להשתמש בספרות 1 עד 7 או באקורדים (לא: ${characters})`,
     duplicates: 'מספר שחזר על עצמו מוצג פעם אחת',
     suggestionsLabel: 'רצפים נפוצים',
     suggestions: {
+      all: 'הכל',
       pop: 'פופ',
       fifties: 'שנות ה-50',
       sensitive: 'פופ במינור',
       jazz: 'ג׳אז',
       blues: 'בלוז ורוק',
     },
+  },
+  converter: {
+    errorInvalid: (chords) => `לא הצלחתי לזהות: ${chords}`,
+    noKey: 'האקורדים האלה לא שייכים לאף סולם מז׳ורי',
+    inKey: (key) => `בסולם ${key}`,
+    outsideKey: '? = אקורד מחוץ לסולם',
+    otherKeys: 'סולמות אפשריים נוספים',
   },
   tableCaption: 'אקורדים לפי דרגה בכל 12 הסולמות',
   keyColumn: 'סולם',
@@ -132,32 +128,30 @@ const en: Messages = {
   languageLabel: 'Language',
   instrumentLabel: 'Instrument',
   instruments: { guitar: 'Guitar', piano: 'Piano' },
-  pickerLabel: 'Which chords to show',
-  presetsLabel: 'Quick picks',
-  presets: {
-    all: { name: 'All' },
-    oneFourFive: { sequence: '1 · 4 · 5' },
-    major: { name: 'Major' },
-    minor: { name: 'Minor' },
-    pop: { name: 'Pop', sequence: '1·5·6·4' },
-  },
-  lastDegreeHint: 'At least one chord must stay in the table',
   sequence: {
     label: 'Your own sequence',
-    placeholder: 'e.g. 1-6-4-5',
-    help: 'Digits 1 to 7. Columns appear in the order you type.',
+    placeholder: 'e.g. 1-6-4-5 or Am F C G',
+    help: 'Digits 1 to 7, or chords that are converted to numbers in their key. Columns appear in the order you type.',
     submit: 'Show',
-    errorEmpty: 'Type at least one digit from 1 to 7',
-    errorInvalid: (characters) => `Only digits 1 to 7 can be used (not: ${characters})`,
+    errorEmpty: 'Type digits 1 to 7 or chords',
+    errorInvalid: (characters) => `Use digits 1 to 7 or chords (not: ${characters})`,
     duplicates: 'A repeated number is shown once',
     suggestionsLabel: 'Common progressions',
     suggestions: {
+      all: 'All',
       pop: 'Pop',
       fifties: "'50s",
       sensitive: 'Minor pop',
       jazz: 'Jazz',
       blues: 'Blues & rock',
     },
+  },
+  converter: {
+    errorInvalid: (chords) => `Could not read: ${chords}`,
+    noKey: 'These chords don’t belong to any major key',
+    inKey: (key) => `In ${key}`,
+    outsideKey: '? = chord outside the key',
+    otherKeys: 'Other possible keys',
   },
   tableCaption: 'Chords by scale degree in all 12 keys',
   keyColumn: 'Key',

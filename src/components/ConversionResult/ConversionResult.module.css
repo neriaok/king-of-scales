@@ -1,0 +1,89 @@
+.conversion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+  background: var(--color-sheet);
+  max-width: 560px;
+}
+
+.answer {
+  margin: 0;
+  font-size: 16px;
+}
+
+.numbers {
+  font-size: 22px;
+  font-variant-numeric: tabular-nums;
+  unicode-bidi: isolate;
+}
+
+.pairs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pair {
+  font-weight: 700;
+  font-size: 14px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-pill);
+  padding: 2px 10px;
+}
+
+.arrow {
+  color: var(--color-muted);
+  margin: 0 4px;
+}
+
+.outside {
+  color: var(--color-error);
+}
+
+.help {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-muted);
+}
+
+.keys {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.keysLabel {
+  color: var(--color-muted);
+}
+
+.keyOption {
+  font-size: 13px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-line);
+  background: transparent;
+  color: var(--color-ink);
+  cursor: pointer;
+}
+
+.keyOption[aria-pressed='true'] {
+  background: var(--color-ink);
+  border-color: var(--color-ink);
+  color: var(--color-sheet);
+}
+
+.keyNumbers {
+  font-weight: 500;
+  margin-inline-start: 6px;
+  unicode-bidi: isolate;
+  opacity: 0.85;
+}

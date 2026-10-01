@@ -11,9 +11,11 @@ those chords in all 12 keys, with guitar and piano diagrams you can hear.
 ## Features
 
 - **One table, your columns.** 12 rows (C, D♭, D, E♭, E, F, F♯, G, A♭, A, B♭, B), one column per
-  selected degree out of 1, 2m, 3m, 4, 5, 6m and 7°. Columns are always in degree order.
-- **Chord picker.** Toggle chips labelled in C ("4 · F") plus presets: all, 1·4·5, major, minor
-  and the pop progression 1·5·6·4. At least one degree always stays selected.
+  degree in your sequence, out of 1, 2m, 3m, 4, 5, 6m and 7°.
+- **Your own sequence.** Type degree numbers (`1-6-4-5`) and the table shows exactly those
+  columns in that order, or type chords (`Am F C G`) and they are converted to numbers in their
+  key first, chord by chord, with a choice of key when several fit. Common progressions
+  (1-5-6-4, 1-6-4-5, 6-4-1-5, 2-5-1, 1-4-5, all) are one tap away.
 - **Role names.** Column headers explain the function of each degree: home (1), moving away (4),
   tension / dominant (5), relative minor (6m).
 - **Colour by quality.** Major, minor and diminished chords each have their own colour.
@@ -78,7 +80,8 @@ only the columns you selected. All of it is pure TypeScript with unit tests, sep
 
 ### Notes on the spec
 
-- The presets "1 · 4 · 5" and "מז׳ור" select the same degrees, so both show as pressed together.
+- The spec's degree chips and presets were later replaced by the sequence box, at the owner's
+  request; the table's columns now follow the typed order.
 - Clicking the header's instrument switch keeps the popover open, so both switches can be seen
   changing together.
 
