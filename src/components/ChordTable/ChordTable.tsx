@@ -30,7 +30,7 @@ const ChordTable: FC = () => {
   const messages = useMessages();
   const visibleDegrees = useAppSelector(selectVisibleDegrees);
   const openChord = useAppSelector(selectSelectedChord);
-  const rows = useMemo(() => buildTable(visibleDegrees), [visibleDegrees]);
+  const rows = useMemo(() => buildTable(visibleDegrees, 'given'), [visibleDegrees]);
   const columns = visibleDegrees.map(getDegree);
 
   const handleSelect = (chord: SelectedChord) => {
