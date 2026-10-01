@@ -4,7 +4,7 @@ Learn to play the chords of any major key by their **scale degrees**. Pick the
 degrees you care about (say 1 · 4 · 5, which is C F G in C), and the app shows
 those chords in all 12 keys, with guitar and piano diagrams you can hear.
 
-> Live demo: _coming with the deploy milestone_
+> **Live demo:** https://king-of-scales.vercel.app/ (deployed on Vercel; every PR gets a preview deployment)
 
 ![Screenshot placeholder](docs/screenshot.png)
 
@@ -26,7 +26,7 @@ those chords in all 12 keys, with guitar and piano diagrams you can hear.
 ## Stack
 
 Vite · React 18 · TypeScript (strict) · Redux Toolkit · CSS Modules · Vitest + Testing Library ·
-ESLint + Prettier · Husky + lint-staged + commitlint · GitHub Actions · GitHub Pages
+ESLint + Prettier · Husky + lint-staged + commitlint · GitHub Actions (CI) · Vercel (hosting)
 
 ## Scripts
 
