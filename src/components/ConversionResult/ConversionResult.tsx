@@ -7,7 +7,7 @@ import { formatChord } from '../../lib/music/notes';
 import styles from './ConversionResult.module.css';
 
 interface ConversionResultProps {
-  /** The chords as typed, in order. */
+  /** The chords in order, written the usual way (e.g. `Am`). */
   typed: readonly string[];
   /** The key whose numbers are shown. */
   shown: KeyAnalysis;

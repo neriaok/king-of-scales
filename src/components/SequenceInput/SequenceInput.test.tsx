@@ -145,6 +145,19 @@ describe('SequenceInput', () => {
       expect(rowChords('D')).toEqual(['Em']);
     });
 
+    it('reads chords typed in capitals, as phone keyboards do', async () => {
+      const user = userEvent.setup();
+      renderInput();
+      await typeSequence(user, 'C F G AM{Enter}');
+      expect(answer()).toBe('1-4-5-6');
+      expect(rowChords('C')).toEqual(['C', 'F', 'G', 'Am']);
+      expect(
+        within(screen.getByRole('status'))
+          .getAllByRole('listitem')
+          .map((li) => li.textContent),
+      ).toEqual(['C→1', 'F→4', 'G→5', 'Am→6']);
+    });
+
     it('accepts sevenths and lowercase', async () => {
       const user = userEvent.setup();
       renderInput();
