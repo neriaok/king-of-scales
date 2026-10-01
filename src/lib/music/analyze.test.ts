@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   analyzeProgression,
   formatDegreeNumbers,
+  looksLikeChords,
   parseChordList,
   parseTypedChord,
 } from './analyze';
@@ -63,6 +64,8 @@ describe('parseChordList', () => {
 describe('analyzeProgression', () => {
   it('converts a single chord to its number', () => {
     expect(best('C')).toMatchObject({ key: 'C', numbers: '1' });
+    expect(best('Em')).toMatchObject({ key: 'G', numbers: '6' });
+    expect(best('B°')).toMatchObject({ key: 'C', numbers: '7' });
     expect(analyzeProgression(chordsOf('Em')).map((a) => a.key.displayName)).toEqual(
       expect.arrayContaining(['G', 'C', 'D']),
     );
@@ -94,7 +97,21 @@ describe('analyzeProgression', () => {
     expect(numbers).toBe('1-4-5-?');
   });
 
+  it('reads minor-framed progressions in the relative major', () => {
+    expect(best('Am Dm E Am')).toMatchObject({ key: 'C', numbers: '6-2-?-6' });
+    expect(best('Em C D Em')).toMatchObject({ key: 'G', numbers: '6-4-5-6' });
+  });
+
   it('keeps repeated chords in the numbers', () => {
     expect(best('C G Am F C')).toMatchObject({ key: 'C', numbers: '1-5-6-4-1' });
+  });
+});
+
+describe('looksLikeChords', () => {
+  it('tells chords from degree numbers', () => {
+    expect(looksLikeChords('Am F C G')).toBe(true);
+    expect(looksLikeChords('em')).toBe(true);
+    expect(looksLikeChords('1-6-4-5')).toBe(false);
+    expect(looksLikeChords('1 6m 4 7°')).toBe(false);
   });
 });

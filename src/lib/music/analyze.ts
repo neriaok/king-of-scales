@@ -95,14 +95,18 @@ export interface KeyAnalysis {
 
 /**
  * Ranks the 12 major keys by how many of the chords they contain. Ties go to the key whose
- * tonic (degree 1) appears in the progression, first or last chord on the tonic first.
+ * tonic (degree 1) starts or ends the progression, then to the key where a minor chord that
+ * starts or ends it is the relative minor (6m), then to the key whose tonic appears most.
  */
 export const analyzeProgression = (chords: readonly TypedChord[]): KeyAnalysis[] => {
   const score = (analysis: KeyAnalysis): number => {
     const tonicCount = analysis.degrees.filter((id) => id === '1').length;
-    const startsOrEnds =
-      (analysis.degrees[0] === '1' ? 1 : 0) + (analysis.degrees.at(-1) === '1' ? 1 : 0);
-    return analysis.matched * 100 + startsOrEnds * 10 + tonicCount;
+    const first = analysis.degrees[0];
+    const last = analysis.degrees.at(-1);
+    const startsOrEnds = (first === '1' ? 1 : 0) + (last === '1' ? 1 : 0);
+    // A progression framed by a minor chord is usually in its relative major (as 6m).
+    const relativeMinor = (first === '6m' ? 1 : 0) + (last === '6m' ? 1 : 0);
+    return analysis.matched * 100 + startsOrEnds * 10 + relativeMinor * 5 + tonicCount;
   };
 
   return KEYS.map((key) => {
@@ -124,3 +128,6 @@ export const analyzeProgression = (chords: readonly TypedChord[]): KeyAnalysis[]
 /** Degree numbers as digits, with `?` for chords outside the key, e.g. `6-4-1-5`. */
 export const formatDegreeNumbers = (degrees: readonly (DegreeId | null)[]): string =>
   degrees.map((id) => (id ? String(DEGREE_IDS.indexOf(id) + 1) : '?')).join('-');
+
+/** True when the text contains chord letters (A–G) rather than only degree numbers. */
+export const looksLikeChords = (text: string): boolean => /[A-Ga-g]/u.test(text);
