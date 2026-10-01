@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 import { initialUiState } from '../../features/ui/uiSlice';
 import { renderWithStore } from '../../test/renderWithStore';
-import DegreePicker from '../DegreePicker';
+import SequenceInput from '../SequenceInput';
 import ChordTable from './ChordTable';
 
 const rowFor = (keyName: string) => {
@@ -41,13 +41,13 @@ describe('ChordTable', () => {
     const user = userEvent.setup();
     renderWithStore(
       <>
-        <DegreePicker />
+        <SequenceInput />
         <ChordTable />
       </>,
-      { preloadedState: { ui: { ...initialUiState, selectedDegrees: ['1'] } } },
     );
-    await user.click(screen.getByRole('button', { name: '4 · F' }));
-    await user.click(screen.getByRole('button', { name: '5 · G' }));
+    const input = screen.getByRole('textbox', { name: 'רצף משלך' });
+    await user.clear(input);
+    await user.type(input, '1 4 5{Enter}');
 
     expect(screen.getAllByRole('columnheader')).toHaveLength(5);
     expect(chordsIn(rowFor('C'))).toEqual(['C', 'F', 'G']);

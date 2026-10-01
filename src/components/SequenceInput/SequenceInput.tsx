@@ -1,10 +1,6 @@
 import type { FC, FormEvent } from 'react';
-import { useId, useState } from 'react';
-import {
-  selectIsCustomOrder,
-  selectVisibleDegrees,
-  setDegreeSequence,
-} from '../../features/ui/uiSlice';
+import { useEffect, useId, useState } from 'react';
+import { selectVisibleDegrees, setDegreeSequence } from '../../features/ui/uiSlice';
 import { useAppDispatch, useAppSelector } from '../../hooks/useAppDispatch';
 import { useMessages } from '../../hooks/useMessages';
 import type { DegreeId } from '../../lib/music/degrees';
@@ -22,16 +18,17 @@ const SequenceInput: FC = () => {
   const dispatch = useAppDispatch();
   const messages = useMessages();
   const visibleDegrees = useAppSelector(selectVisibleDegrees);
-  const isCustomOrder = useAppSelector(selectIsCustomOrder);
-  const [value, setValue] = useState(() =>
-    isCustomOrder ? formatDegreeSequence(visibleDegrees) : '',
-  );
+  const currentSequence = formatDegreeSequence(visibleDegrees);
+  const [value, setValue] = useState(currentSequence);
   const [feedback, setFeedback] = useState<Feedback>(null);
   const inputId = useId();
   const helpId = useId();
   const feedbackId = useId();
 
-  const currentSequence = formatDegreeSequence(visibleDegrees);
+  // Show what the table shows, also when the sequence comes from a suggestion or the converter.
+  useEffect(() => {
+    setValue(currentSequence);
+  }, [currentSequence]);
 
   const showSequence = (degrees: DegreeId[]) => {
     dispatch(setDegreeSequence(degrees));
