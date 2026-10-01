@@ -6,6 +6,8 @@ import {
   parseChordList,
   parseTypedChord,
 } from './analyze';
+import { DEGREE_IDS } from './degrees';
+import { KEYS, diatonicChords } from './keys';
 
 const chordsOf = (text: string) => {
   const result = parseChordList(text);
@@ -113,5 +115,61 @@ describe('looksLikeChords', () => {
     expect(looksLikeChords('em')).toBe(true);
     expect(looksLikeChords('1-6-4-5')).toBe(false);
     expect(looksLikeChords('1 6m 4 7°')).toBe(false);
+  });
+});
+
+describe('chords typed in any case (phone keyboards)', () => {
+  it.each([
+    ['AM', 'Am'],
+    ['am', 'Am'],
+    ['Am', 'Am'],
+    ['F#M', 'F#m'],
+    ['EBM', 'Ebm'],
+    ['AB', 'Ab'],
+    ['BB', 'Bb'],
+    ['bb', 'Bb'],
+    ['BDIM', 'B°'],
+    ['AM7', 'Am'],
+    ['CMAJ7', 'C'],
+    ['CM7', 'Cm'],
+    ['DbM7', 'Db'],
+    ['Cmaj7', 'C'],
+    ['G7', 'G'],
+    ['DSUS4', 'D'],
+  ])('reads %s as %s', (text, name) => {
+    expect(parseTypedChord(text)?.name).toBe(name);
+  });
+
+  it('reads the user-reported C F G AM as 1-4-5-6', () => {
+    expect(best('C F G AM')).toMatchObject({ key: 'C', numbers: '1-4-5-6' });
+  });
+
+  it.each(['upper', 'lower', 'as written'] as const)(
+    'finds every key from its seven chords typed %s',
+    (style) => {
+      KEYS.forEach((key) => {
+        const chords = diatonicChords(key).map((chord) =>
+          style === 'upper'
+            ? chord.replace('°', 'dim').toUpperCase()
+            : style === 'lower'
+              ? chord.replace('°', 'dim').toLowerCase()
+              : chord,
+        );
+        const [first] = analyzeProgression(chordsOf(chords.join(' ')));
+        expect(first?.key.name).toBe(key.name);
+        expect(formatDegreeNumbers(first?.degrees ?? [])).toBe('1-2-3-4-5-6-7');
+      });
+    },
+  );
+
+  it('finds every chord of every key on its own', () => {
+    KEYS.forEach((key) => {
+      diatonicChords(key).forEach((chord, index) => {
+        const typed = chord.replace('°', 'dim').toUpperCase();
+        const fits = analyzeProgression(chordsOf(typed));
+        const inKey = fits.find((analysis) => analysis.key.name === key.name);
+        expect(inKey?.degrees).toEqual([DEGREE_IDS[index]]);
+      });
+    });
   });
 });
