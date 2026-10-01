@@ -1,6 +1,6 @@
 import clsx from 'clsx';
 import type { FC } from 'react';
-import { chordButtonId } from '../../features/ui/chordButtonId';
+import { CHORD_POPOVER_ID, chordButtonId } from '../../features/ui/chordButtonId';
 import type { SelectedChord } from '../../features/ui/uiSlice';
 import type { DegreeId } from '../../lib/music/degrees';
 import type { ChordQuality } from '../../lib/music/notes';
@@ -38,6 +38,7 @@ const ChordCell: FC<ChordCellProps> = ({
         className={clsx(styles.chord, QUALITY_CLASS[quality], isOpen && styles.open)}
         aria-haspopup="dialog"
         aria-expanded={isOpen}
+        aria-controls={isOpen ? CHORD_POPOVER_ID : undefined}
         data-chord={symbol}
         onClick={() => onSelect({ symbol, keyName, degreeId })}
       >
