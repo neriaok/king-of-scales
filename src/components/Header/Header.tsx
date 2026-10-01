@@ -35,7 +35,7 @@ const Header: FC = () => {
         <h1 className={styles.title}>{messages.appTitle}</h1>
         <p className={styles.subtitle}>{messages.subtitle}</p>
       </div>
-      <div className={styles.controls}>
+      <div className={styles.controls} data-keeps-popover>
         <SegmentedControl
           label={messages.instrumentLabel}
           options={INSTRUMENT_ORDER.map((value) => ({
