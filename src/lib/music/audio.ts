@@ -1,5 +1,7 @@
 /**
  * Small Web Audio synth for previewing chords. Framework-free: no React imports.
+ * Guitar notes are physically modelled plucked strings (see pluckedString.ts) shaped by an
+ * acoustic-body EQ; the piano is a soft triangle-wave tone.
  * The AudioContext is created lazily on the first play, which must come from a user
  * gesture (browsers block audio that starts on its own).
  */
@@ -7,6 +9,7 @@ import type { GuitarVoicing } from './guitarVoicings';
 import { voicingMidiNotes } from './guitarVoicings';
 import type { Chord } from './notes';
 import { pianoMidiNotes } from './pianoVoicing';
+import { renderPluckedString } from './pluckedString';
 
 /** Delay between strings in a guitar strum, in seconds. */
 export const STRUM_DELAY = 0.035;
@@ -19,7 +22,25 @@ export interface ToneOptions {
   duration: number;
 }
 
-const GUITAR_TONE: ToneOptions = { type: 'sawtooth', gain: 0.07, duration: 2.2 };
+/** Length of each rendered guitar note, in seconds. */
+export const GUITAR_NOTE_SECONDS = 3;
+/** Level of each string in the strum; a little quieter towards the treble strings. */
+const GUITAR_STRING_GAIN = 0.3;
+
+/** Acoustic body EQ: low cut, warm body resonances, softened top end. */
+const GUITAR_BODY: readonly {
+  type: BiquadFilterType;
+  frequency: number;
+  q: number;
+  gain: number;
+}[] = [
+  { type: 'highpass', frequency: 70, q: 0.7, gain: 0 },
+  { type: 'peaking', frequency: 110, q: 1.2, gain: 5 },
+  { type: 'peaking', frequency: 220, q: 1.5, gain: 3 },
+  { type: 'peaking', frequency: 2800, q: 1, gain: -2 },
+  { type: 'lowpass', frequency: 6500, q: 0.7, gain: 0 },
+];
+
 const PIANO_TONE: ToneOptions = { type: 'triangle', gain: 0.14, duration: 2.4 };
 
 export const midiToFrequency = (midi: number): number => 440 * 2 ** ((midi - 69) / 12);
@@ -50,9 +71,28 @@ export class ChordPlayer {
     return this.context !== null;
   }
 
-  /** Strums the voicing's real pitches, low string first. */
+  /** Strums the voicing's real pitches as plucked strings, low string first. */
   playGuitar(voicing: GuitarVoicing): void {
-    this.playNotes(voicingMidiNotes(voicing), STRUM_DELAY, GUITAR_TONE);
+    const context = this.ensureContext();
+    if (!context) return;
+    const body = this.createGuitarBody(context);
+    const start = context.currentTime + 0.03;
+    voicingMidiNotes(voicing).forEach((midi, index) => {
+      const samples = renderPluckedString({
+        sampleRate: context.sampleRate,
+        frequency: midiToFrequency(midi),
+        duration: GUITAR_NOTE_SECONDS,
+      });
+      const buffer = context.createBuffer(1, samples.length, context.sampleRate);
+      buffer.getChannelData(0).set(samples);
+
+      const source = context.createBufferSource();
+      source.buffer = buffer;
+      const level = context.createGain();
+      level.gain.value = GUITAR_STRING_GAIN * (1 - index * 0.04);
+      source.connect(level).connect(body);
+      source.start(start + index * STRUM_DELAY);
+    });
   }
 
   /** Root-position triad around C4 plus the root an octave lower, all at once. */
@@ -77,6 +117,22 @@ export class ChordPlayer {
     return this.context;
   }
 
+  /** A chain of filters shared by all strings of one strum, ending at the speakers. */
+  private createGuitarBody(context: AudioContext): AudioNode {
+    const filters = GUITAR_BODY.map(({ type, frequency, q, gain }) => {
+      const filter = context.createBiquadFilter();
+      filter.type = type;
+      filter.frequency.value = frequency;
+      filter.Q.value = q;
+      filter.gain.value = gain;
+      return filter;
+    });
+    filters.forEach((filter, index) => {
+      filter.connect(filters[index + 1] ?? context.destination);
+    });
+    return filters[0] ?? context.destination;
+  }
+
   private playNotes(midiNotes: readonly number[], stagger: number, tone: ToneOptions): void {
     const context = this.ensureContext();
     if (!context) return;
@@ -92,7 +148,7 @@ export class ChordPlayer {
     oscillator.type = tone.type;
     oscillator.frequency.value = midiToFrequency(midi);
     filter.type = 'lowpass';
-    filter.frequency.value = tone.type === 'sawtooth' ? 2200 : 3000;
+    filter.frequency.value = 3000;
 
     envelope.gain.setValueAtTime(0, at);
     envelope.gain.linearRampToValueAtTime(tone.gain, at + 0.008);
