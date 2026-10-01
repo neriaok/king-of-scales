@@ -74,7 +74,7 @@ describe('SequenceInput', () => {
     renderInput();
     await user.clear(input());
     await user.click(show());
-    expect(screen.getByRole('alert')).toHaveTextContent('לפחות ספרה אחת');
+    expect(screen.getByRole('alert')).toHaveTextContent('הקלד ספרות 1 עד 7 או אקורדים');
   });
 
   it('shows repeated numbers once and says so', async () => {
@@ -101,5 +101,81 @@ describe('SequenceInput', () => {
   it('starts with the saved custom sequence in the input', () => {
     renderInput({ ...initialUiState, selectedDegrees: ['6m', '4', '1', '5'] });
     expect(input()).toHaveValue('6-4-1-5');
+  });
+
+  describe('with chords', () => {
+    const answer = () => screen.getByRole('status').querySelector('strong')?.textContent;
+
+    it('converts chords into numbers in their key and shows them', async () => {
+      const user = userEvent.setup();
+      renderInput();
+      await typeSequence(user, 'Am F C G{Enter}');
+      expect(input()).toHaveValue('6-4-1-5');
+      expect(rowChords('C')).toEqual(['Am', 'F', 'C', 'G']);
+      const status = within(screen.getByRole('status'));
+      expect(status.getByText('בסולם C:')).toBeInTheDocument();
+      expect(answer()).toBe('6-4-1-5');
+      expect(status.getAllByRole('listitem').map((li) => li.textContent)).toEqual([
+        'Am→6',
+        'F→4',
+        'C→1',
+        'G→5',
+      ]);
+    });
+
+    it('finds the key on its own', async () => {
+      const user = userEvent.setup();
+      renderInput();
+      await typeSequence(user, 'G D Em C{Enter}');
+      expect(screen.getByText('בסולם G:')).toBeInTheDocument();
+      expect(rowChords('G')).toEqual(['G', 'D', 'Em', 'C']);
+    });
+
+    it('lets you choose the key when several fit, e.g. a single chord', async () => {
+      const user = userEvent.setup();
+      renderInput();
+      await typeSequence(user, 'Em{Enter}');
+      const keys = within(screen.getByRole('group', { name: 'סולמות אפשריים נוספים' }));
+      expect(keys.getAllByRole('button').map((button) => button.textContent)).toEqual(
+        expect.arrayContaining(['G6', 'C3', 'D2']),
+      );
+      await user.click(keys.getByRole('button', { name: /^D/ }));
+      expect(answer()).toBe('2');
+      expect(input()).toHaveValue('2');
+      expect(rowChords('D')).toEqual(['Em']);
+    });
+
+    it('accepts sevenths and lowercase', async () => {
+      const user = userEvent.setup();
+      renderInput();
+      await typeSequence(user, 'dm7 g7 cmaj7{Enter}');
+      expect(answer()).toBe('2-5-1');
+    });
+
+    it('marks chords outside the key with ? and leaves them out of the table', async () => {
+      const user = userEvent.setup();
+      renderInput();
+      await typeSequence(user, 'C F G Bb{Enter}');
+      expect(answer()).toBe('1-4-5-?');
+      expect(screen.getByText('? = אקורד מחוץ לסולם')).toBeInTheDocument();
+      expect(rowChords('C')).toEqual(['C', 'F', 'G']);
+    });
+
+    it('explains chords it cannot read', async () => {
+      const user = userEvent.setup();
+      renderInput();
+      await typeSequence(user, 'Am Xyz{Enter}');
+      expect(screen.getByRole('alert')).toHaveTextContent('לא הצלחתי לזהות: Xyz');
+      expect(input()).toHaveAttribute('aria-invalid', 'true');
+    });
+
+    it('works in English', async () => {
+      const user = userEvent.setup();
+      renderInput({ ...initialUiState, language: 'en' });
+      const box = screen.getByRole('textbox', { name: 'Your own sequence' });
+      await user.clear(box);
+      await user.type(box, 'Am F C G{Enter}');
+      expect(screen.getByText('In C:')).toBeInTheDocument();
+    });
   });
 });
