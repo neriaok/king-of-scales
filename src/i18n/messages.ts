@@ -15,6 +15,11 @@ export const LANGUAGE_DIR: Readonly<Record<Language, 'rtl' | 'ltr'>> = { he: 'rt
 /** Each language's name in itself, for the language switch. */
 export const LANGUAGE_NAMES: Readonly<Record<Language, string>> = { he: 'עברית', en: 'English' };
 
+export interface PresetLabel {
+  name?: string;
+  sequence?: string;
+}
+
 /** Every user-facing string. Adding a key here makes TypeScript require it in both languages. */
 export interface Messages {
   appTitle: string;
@@ -24,7 +29,8 @@ export interface Messages {
   instruments: Record<'guitar' | 'piano', string>;
   pickerLabel: string;
   presetsLabel: string;
-  presets: Record<PresetId, string>;
+  /** Preset button text: a name and/or a degree sequence that always reads left to right. */
+  presets: Record<PresetId, PresetLabel>;
   lastDegreeHint: string;
   tableCaption: string;
   keyColumn: string;
@@ -57,11 +63,11 @@ const he: Messages = {
   pickerLabel: 'אילו אקורדים להציג',
   presetsLabel: 'בחירה מהירה',
   presets: {
-    all: getPreset('all').label,
-    oneFourFive: getPreset('oneFourFive').label,
-    major: getPreset('major').label,
-    minor: getPreset('minor').label,
-    pop: getPreset('pop').label,
+    all: { name: getPreset('all').label },
+    oneFourFive: { sequence: getPreset('oneFourFive').label },
+    major: { name: getPreset('major').label },
+    minor: { name: getPreset('minor').label },
+    pop: { name: 'פופ', sequence: '1·5·6·4' },
   },
   lastDegreeHint: 'חייב להישאר לפחות אקורד אחד בטבלה',
   tableCaption: 'אקורדים לפי דרגה בכל 12 הסולמות',
@@ -100,11 +106,11 @@ const en: Messages = {
   pickerLabel: 'Which chords to show',
   presetsLabel: 'Quick picks',
   presets: {
-    all: 'All',
-    oneFourFive: '1 · 4 · 5',
-    major: 'Major',
-    minor: 'Minor',
-    pop: 'Pop 1·5·6·4',
+    all: { name: 'All' },
+    oneFourFive: { sequence: '1 · 4 · 5' },
+    major: { name: 'Major' },
+    minor: { name: 'Minor' },
+    pop: { name: 'Pop', sequence: '1·5·6·4' },
   },
   lastDegreeHint: 'At least one chord must stay in the table',
   tableCaption: 'Chords by scale degree in all 12 keys',

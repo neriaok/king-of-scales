@@ -11,10 +11,9 @@
   gap: var(--space-5);
 }
 
-.title {
-  font-family: var(--font-display);
-  font-weight: 400;
-  font-size: clamp(32px, 6vw, 52px);
-  line-height: 1;
-  margin: 0;
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  min-width: 0;
 }

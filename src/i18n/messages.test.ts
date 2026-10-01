@@ -7,7 +7,9 @@ const stringLeaves = (messages: Messages): string[] =>
   Object.values(messages).flatMap((value: unknown) => {
     if (typeof value === 'string') return [value];
     if (typeof value === 'function') return [String((value as (arg: string) => string)('C'))];
-    return Object.values(value as Record<string, string>);
+    return Object.values(value as Record<string, unknown>).flatMap((inner) =>
+      typeof inner === 'string' ? [inner] : Object.values(inner as Record<string, string>),
+    );
   });
 
 describe('messages', () => {
@@ -24,7 +26,10 @@ describe('messages', () => {
 
   it.each(LANGUAGES)('%s labels every preset and every role', (language) => {
     const messages = MESSAGES[language];
-    PRESETS.forEach((preset) => expect(messages.presets[preset.id]).toBeTruthy());
+    PRESETS.forEach((preset) => {
+      const label = messages.presets[preset.id];
+      expect(label.name ?? label.sequence).toBeTruthy();
+    });
     DEGREES.filter((degree) => degree.role).forEach((degree) =>
       expect(messages.roles[degree.id]).toBeTruthy(),
     );
@@ -37,6 +42,12 @@ describe('messages', () => {
       '5': 'מתח · דומיננטה',
       '6m': 'מינור מקביל',
     });
+  });
+
+  it('keeps the Hebrew preset labels from the spec', () => {
+    const text = (id: keyof typeof MESSAGES.he.presets) =>
+      [MESSAGES.he.presets[id].name, MESSAGES.he.presets[id].sequence].filter(Boolean).join(' ');
+    expect(PRESETS.map((preset) => text(preset.id))).toEqual(PRESETS.map((preset) => preset.label));
   });
 
   it('builds column subtitles', () => {

@@ -1,0 +1,110 @@
+.scroller {
+  /* LTR so the key column is visible first in both languages; relative so nothing escapes. */
+  position: relative;
+  direction: ltr;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+}
+
+.table {
+  --label-width: 64px;
+  --chord-width: 64px;
+
+  direction: ltr;
+  width: 100%;
+  min-width: calc(2 * var(--label-width) + var(--column-count, 7) * var(--chord-width));
+  border-collapse: separate;
+  border-spacing: 0 5px;
+  table-layout: fixed;
+}
+
+.label {
+  width: var(--label-width);
+  font-size: 12px;
+  line-height: 1.2;
+  color: var(--color-muted);
+  font-weight: 500;
+  vertical-align: bottom;
+  padding: 4px 2px 8px;
+}
+
+:global(html[dir='rtl']) .label {
+  direction: rtl;
+}
+
+.degreeHeader {
+  font-weight: 800;
+  vertical-align: bottom;
+  padding: 4px 2px 8px;
+}
+
+.degree {
+  display: block;
+  font-size: 24px;
+  font-variant-numeric: tabular-nums;
+}
+
+.role {
+  display: block;
+  min-height: 15px;
+  font-size: 12px;
+  line-height: 1.25;
+  color: var(--color-muted);
+  font-weight: 500;
+}
+
+:global(html[dir='rtl']) .role {
+  direction: rtl;
+}
+
+.major .degree {
+  color: var(--color-major);
+}
+
+.minor .degree {
+  color: var(--color-minor);
+}
+
+.diminished .degree {
+  color: var(--color-dim);
+}
+
+.key {
+  position: relative;
+  background: var(--color-key-bg);
+  color: var(--color-key-fg);
+  font-weight: 800;
+  font-size: 21px;
+  border-radius: var(--radius-md) 0 0 var(--radius-md);
+  white-space: nowrap;
+}
+
+.star {
+  position: absolute;
+  top: 3px;
+  right: 6px;
+  font-size: 11px;
+  color: var(--color-accent);
+}
+
+.capo {
+  background: var(--color-capo-bg);
+  color: var(--color-muted);
+  font-weight: 700;
+  font-size: 16px;
+  text-align: center;
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 420px) {
+  .table {
+    --label-width: 56px;
+    --chord-width: 60px;
+  }
+
+  .key {
+    font-size: 18px;
+  }
+}

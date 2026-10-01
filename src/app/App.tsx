@@ -1,18 +1,25 @@
 import type { FC } from 'react';
+import ChordTable from '../components/ChordTable';
+import DegreePicker from '../components/DegreePicker';
+import Header from '../components/Header';
+import Legend from '../components/Legend';
 import { useDocumentLanguage } from '../hooks/useDocumentLanguage';
-import { useMessages } from '../hooks/useMessages';
 import styles from './App.module.css';
 
 const App: FC = () => {
   useDocumentLanguage();
-  const messages = useMessages();
 
   return (
-    <main className={styles.app}>
+    <div className={styles.app}>
       <div className={styles.wrap}>
-        <h1 className={styles.title}>{messages.appTitle}</h1>
+        <Header />
+        <main className={styles.main}>
+          <DegreePicker />
+          <ChordTable />
+          <Legend />
+        </main>
       </div>
-    </main>
+    </div>
   );
 };
 
