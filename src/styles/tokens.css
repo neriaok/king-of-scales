@@ -1,0 +1,116 @@
+/*
+ * Design tokens. Every colour in the app comes from here.
+ * Light is the default; dark follows prefers-color-scheme, and data-theme can force either.
+ */
+:root {
+  /* Surfaces and text */
+  --color-bg: #eceff2;
+  --color-sheet: #fbfcfd;
+  --color-ink: #1b2129;
+  --color-muted: #63707e;
+  --color-line: #d5dbe2;
+
+  /* Chord qualities */
+  --color-major: #b4531c;
+  --color-minor: #22668c;
+  --color-dim: #8c96a1;
+
+  /* Table */
+  --color-key-bg: #1b2129;
+  --color-key-fg: #f2f4f6;
+  --color-capo-bg: #e1e6eb;
+
+  /* Accent: focus rings, stars, play button, highlighted piano keys */
+  --color-accent: #d9822b;
+  --color-on-accent: #1b1208;
+
+  /* Diagrams */
+  --color-wood: #efe6d6;
+  --color-fret: #9aa3ad;
+  --color-nut: #1b2129;
+  --color-dot: #1b2129;
+  --color-dot-fg: #ffffff;
+  --color-white-key: #ffffff;
+  --color-black-key: #20262e;
+
+  /* Elevation */
+  --shadow-pop: 0 18px 50px rgb(20 30 45 / 22%);
+
+  /* Typography */
+  --font-display: 'Secular One', 'Heebo', system-ui, sans-serif;
+  --font-body: 'Heebo', system-ui, 'Segoe UI', Arial, sans-serif;
+
+  /* Spacing and shape */
+  --gutter: 16px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-pill: 999px;
+
+  /* Focus */
+  --focus-ring: 3px solid var(--color-accent);
+  --focus-offset: 2px;
+
+  /* Motion */
+  --duration-fast: 0.14s;
+
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --color-bg: #12161b;
+    --color-sheet: #1a2028;
+    --color-ink: #e7ebef;
+    --color-muted: #93a0ad;
+    --color-line: #2c3540;
+    --color-major: #f08a4b;
+    --color-minor: #6db6e0;
+    --color-dim: #7d8995;
+    --color-key-bg: #e7ebef;
+    --color-key-fg: #12161b;
+    --color-capo-bg: #232b35;
+    --color-accent: #f0a04b;
+    --color-wood: #2a2620;
+    --color-fret: #5d6670;
+    --color-nut: #e7ebef;
+    --color-dot: #e7ebef;
+    --color-dot-fg: #12161b;
+    --color-white-key: #e9ecef;
+    --color-black-key: #0c0f13;
+    --shadow-pop: 0 18px 50px rgb(0 0 0 / 55%);
+
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme='dark'] {
+  --color-bg: #12161b;
+  --color-sheet: #1a2028;
+  --color-ink: #e7ebef;
+  --color-muted: #93a0ad;
+  --color-line: #2c3540;
+  --color-major: #f08a4b;
+  --color-minor: #6db6e0;
+  --color-dim: #7d8995;
+  --color-key-bg: #e7ebef;
+  --color-key-fg: #12161b;
+  --color-capo-bg: #232b35;
+  --color-accent: #f0a04b;
+  --color-wood: #2a2620;
+  --color-fret: #5d6670;
+  --color-nut: #e7ebef;
+  --color-dot: #e7ebef;
+  --color-dot-fg: #12161b;
+  --color-white-key: #e9ecef;
+  --color-black-key: #0c0f13;
+  --shadow-pop: 0 18px 50px rgb(0 0 0 / 55%);
+
+  color-scheme: dark;
+}
