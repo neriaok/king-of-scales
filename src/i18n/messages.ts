@@ -1,6 +1,7 @@
 import type { DegreeId, PresetId } from '../lib/music/degrees';
 import { getDegree, getPreset } from '../lib/music/degrees';
 import type { ChordQuality } from '../lib/music/notes';
+import type { SuggestionId } from '../lib/music/sequence';
 
 export type Language = 'he' | 'en';
 
@@ -32,6 +33,17 @@ export interface Messages {
   /** Preset button text: a name and/or a degree sequence that always reads left to right. */
   presets: Record<PresetId, PresetLabel>;
   lastDegreeHint: string;
+  sequence: {
+    label: string;
+    placeholder: string;
+    help: string;
+    submit: string;
+    errorEmpty: string;
+    errorInvalid: (characters: string) => string;
+    duplicates: string;
+    suggestionsLabel: string;
+    suggestions: Record<SuggestionId, string>;
+  };
   tableCaption: string;
   keyColumn: string;
   capoColumn: string;
@@ -70,6 +82,23 @@ const he: Messages = {
     pop: { name: 'פופ', sequence: '1·5·6·4' },
   },
   lastDegreeHint: 'חייב להישאר לפחות אקורד אחד בטבלה',
+  sequence: {
+    label: 'רצף משלך',
+    placeholder: 'לדוגמה 1-6-4-5',
+    help: 'ספרות 1 עד 7. העמודות יוצגו בסדר שהקלדת.',
+    submit: 'הצג',
+    errorEmpty: 'הקלד לפחות ספרה אחת בין 1 ל-7',
+    errorInvalid: (characters) => `אפשר להשתמש רק בספרות 1 עד 7 (לא: ${characters})`,
+    duplicates: 'מספר שחזר על עצמו מוצג פעם אחת',
+    suggestionsLabel: 'רצפים נפוצים',
+    suggestions: {
+      pop: 'פופ',
+      fifties: 'שנות ה-50',
+      sensitive: 'פופ במינור',
+      jazz: 'ג׳אז',
+      blues: 'בלוז ורוק',
+    },
+  },
   tableCaption: 'אקורדים לפי דרגה בכל 12 הסולמות',
   keyColumn: 'סולם',
   capoColumn: 'קאפו על צורות C',
@@ -113,6 +142,23 @@ const en: Messages = {
     pop: { name: 'Pop', sequence: '1·5·6·4' },
   },
   lastDegreeHint: 'At least one chord must stay in the table',
+  sequence: {
+    label: 'Your own sequence',
+    placeholder: 'e.g. 1-6-4-5',
+    help: 'Digits 1 to 7. Columns appear in the order you type.',
+    submit: 'Show',
+    errorEmpty: 'Type at least one digit from 1 to 7',
+    errorInvalid: (characters) => `Only digits 1 to 7 can be used (not: ${characters})`,
+    duplicates: 'A repeated number is shown once',
+    suggestionsLabel: 'Common progressions',
+    suggestions: {
+      pop: 'Pop',
+      fifties: "'50s",
+      sensitive: 'Minor pop',
+      jazz: 'Jazz',
+      blues: 'Blues & rock',
+    },
+  },
   tableCaption: 'Chords by scale degree in all 12 keys',
   keyColumn: 'Key',
   capoColumn: 'Capo with C shapes',

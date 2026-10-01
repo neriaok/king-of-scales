@@ -6,8 +6,10 @@ import reducer, {
   initialUiState,
   selectActivePreset,
   selectChord,
+  selectIsCustomOrder,
   selectMatchingPresets,
   selectVisibleDegrees,
+  setDegreeSequence,
   setInstrument,
   setLanguage,
   toggleDegree,
@@ -48,6 +50,38 @@ describe('uiSlice', () => {
     expect(reduce(applyPreset('oneFourFive')).selectedDegrees).toEqual(['1', '4', '5']);
   });
 
+  describe('setDegreeSequence', () => {
+    it('shows exactly the typed degrees in the typed order', () => {
+      expect(reduce(setDegreeSequence(['6m', '4', '1', '5'])).selectedDegrees).toEqual([
+        '6m',
+        '4',
+        '1',
+        '5',
+      ]);
+    });
+
+    it('drops repeats and ignores an empty sequence', () => {
+      expect(reduce(setDegreeSequence(['1', '4', '1', '5'])).selectedDegrees).toEqual([
+        '1',
+        '4',
+        '5',
+      ]);
+      expect(reduce(setDegreeSequence([])).selectedDegrees).toEqual(initialUiState.selectedDegrees);
+    });
+
+    it('closes the popover when its column is not in the sequence', () => {
+      const open = selectChord({ symbol: 'F', keyName: 'C', degreeId: '4' });
+      expect(reduce(open, setDegreeSequence(['1', '5'])).selectedChord).toBeNull();
+      expect(reduce(open, setDegreeSequence(['4', '1'])).selectedChord).not.toBeNull();
+    });
+
+    it('returns to degree order when a chip is toggled', () => {
+      expect(
+        reduce(setDegreeSequence(['6m', '4', '1']), toggleDegree('5')).selectedDegrees,
+      ).toEqual(['1', '4', '5', '6m']);
+    });
+  });
+
   it('sets the language', () => {
     expect(reduce(setLanguage('en')).language).toBe('en');
   });
@@ -80,12 +114,30 @@ describe('uiSlice', () => {
   });
 
   describe('selectors', () => {
-    it('selectVisibleDegrees sorts the selection', () => {
-      const state = {
-        ...initialUiState,
-        selectedDegrees: ['5', '1', '4'] as UiState['selectedDegrees'],
-      };
-      expect(selectVisibleDegrees(withUi(state))).toEqual(['1', '4', '5']);
+    it('selectVisibleDegrees keeps degree order after chips and presets', () => {
+      expect(selectVisibleDegrees(withUi(reduce(applyPreset('pop'))))).toEqual([
+        '1',
+        '4',
+        '5',
+        '6m',
+      ]);
+      expect(selectVisibleDegrees(withUi(reduce(applyPreset('minor'), toggleDegree('1'))))).toEqual(
+        ['1', '2m', '3m', '6m'],
+      );
+    });
+
+    it('selectVisibleDegrees keeps the typed order of a sequence', () => {
+      const state = reduce(setDegreeSequence(['6m', '4', '1', '5']));
+      expect(selectVisibleDegrees(withUi(state))).toEqual(['6m', '4', '1', '5']);
+      expect(selectIsCustomOrder(withUi(state))).toBe(true);
+      expect(selectMatchingPresets(withUi(state))).toEqual([]);
+      expect(selectActivePreset(withUi(state))).toBeNull();
+    });
+
+    it('treats a typed sequence already in degree order like a preset', () => {
+      const state = reduce(setDegreeSequence(['1', '4', '5']));
+      expect(selectIsCustomOrder(withUi(state))).toBe(false);
+      expect(selectActivePreset(withUi(state))).toBe('oneFourFive');
     });
 
     it('selectActivePreset finds an exact match or null', () => {

@@ -3,9 +3,16 @@ import { isAnyOf } from '@reduxjs/toolkit';
 import type { Language } from '../../i18n/messages';
 import { isLanguage } from '../../i18n/messages';
 import type { DegreeId } from '../../lib/music/degrees';
-import { DEGREE_IDS, isDegreeId, sortDegrees } from '../../lib/music/degrees';
+import { DEGREE_IDS, isDegreeId } from '../../lib/music/degrees';
 import type { Instrument, UiState } from './uiSlice';
-import { applyPreset, isInstrument, setInstrument, setLanguage, toggleDegree } from './uiSlice';
+import {
+  applyPreset,
+  isInstrument,
+  setDegreeSequence,
+  setInstrument,
+  setLanguage,
+  toggleDegree,
+} from './uiSlice';
 
 export const STORAGE_KEY = 'king-of-scales:ui';
 
@@ -23,7 +30,7 @@ const DEFAULTS: PersistedUi = {
 };
 
 /**
- * Validates whatever was stored. Unknown degrees are dropped; if nothing valid is left
+ * Validates whatever was stored. Unknown and repeated degrees are dropped; if nothing valid is left
  * the selection falls back to all seven degrees. A bad instrument falls back to guitar and
  * a bad language to Hebrew.
  */
@@ -31,8 +38,9 @@ export const parsePersistedUi = (raw: unknown): PersistedUi => {
   if (typeof raw !== 'object' || raw === null) return { ...DEFAULTS };
   const record = raw as Record<string, unknown>;
 
+  // Order is kept: it is degree order unless the user typed a custom sequence.
   const storedDegrees = Array.isArray(record.selectedDegrees)
-    ? sortDegrees(record.selectedDegrees.filter(isDegreeId))
+    ? [...new Set(record.selectedDegrees.filter(isDegreeId))]
     : [];
   return {
     selectedDegrees: storedDegrees.length > 0 ? storedDegrees : [...DEFAULTS.selectedDegrees],
@@ -67,7 +75,7 @@ export const startUiPersistence = (
   listenerMiddleware: ListenerMiddlewareInstance<StateWithUi>,
 ): (() => void) =>
   listenerMiddleware.startListening({
-    matcher: isAnyOf(toggleDegree, applyPreset, setInstrument, setLanguage),
+    matcher: isAnyOf(toggleDegree, applyPreset, setDegreeSequence, setInstrument, setLanguage),
     effect: (_action, api) => {
       const { selectedDegrees, instrument, language } = api.getState().ui;
       savePersistedUi({ selectedDegrees, instrument, language });

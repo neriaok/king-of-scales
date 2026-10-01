@@ -10,6 +10,7 @@ import { useAppDispatch, useAppSelector } from '../../hooks/useAppDispatch';
 import { useMessages } from '../../hooks/useMessages';
 import { DEGREES, PRESETS } from '../../lib/music/degrees';
 import { formatChord } from '../../lib/music/notes';
+import SequenceInput from '../SequenceInput';
 import styles from './DegreePicker.module.css';
 
 const QUALITY_CLASS = {
@@ -79,6 +80,7 @@ const DegreePicker: FC = () => {
           })}
         </div>
       </div>
+      <SequenceInput />
       <p id={hintId} className="visually-hidden">
         {messages.lastDegreeHint}
       </p>

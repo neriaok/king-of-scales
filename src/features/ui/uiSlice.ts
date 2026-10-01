@@ -53,7 +53,10 @@ const uiSlice = createSlice({
   name: 'ui',
   initialState: initialUiState,
   reducers: {
-    /** Adds or removes a column. Ignored when it would leave no column selected. */
+    /**
+     * Adds or removes a column, putting the columns back in degree order. Ignored when it
+     * would leave no column selected.
+     */
     toggleDegree: (state, action: PayloadAction<DegreeId>) => {
       const id = action.payload;
       const isSelected = state.selectedDegrees.includes(id);
@@ -67,6 +70,13 @@ const uiSlice = createSlice({
     },
     applyPreset: (state, action: PayloadAction<PresetId>) => {
       state.selectedDegrees = sortDegrees(getPreset(action.payload).degrees);
+      closeChordIfHidden(state);
+    },
+    /** Shows exactly these degrees, in this order (a typed sequence). Ignored when empty. */
+    setDegreeSequence: (state, action: PayloadAction<DegreeId[]>) => {
+      const sequence = [...new Set(action.payload)];
+      if (sequence.length === 0) return;
+      state.selectedDegrees = sequence;
       closeChordIfHidden(state);
     },
     setInstrument: (state, action: PayloadAction<Instrument>) => {
@@ -84,8 +94,15 @@ const uiSlice = createSlice({
   },
 });
 
-export const { toggleDegree, applyPreset, setInstrument, setLanguage, selectChord, closeChord } =
-  uiSlice.actions;
+export const {
+  toggleDegree,
+  applyPreset,
+  setDegreeSequence,
+  setInstrument,
+  setLanguage,
+  selectChord,
+  closeChord,
+} = uiSlice.actions;
 
 export default uiSlice.reducer;
 
@@ -99,17 +116,31 @@ export const selectLanguage = (state: StateWithUi): Language => state.ui.languag
 export const selectSelectedChord = (state: StateWithUi): SelectedChord | null =>
   state.ui.selectedChord;
 
-/** The selected degrees in degree order (1 → 7°). */
-export const selectVisibleDegrees = createSelector([selectSelectedDegrees], (degrees) =>
-  sortDegrees(degrees),
-);
+/**
+ * The columns to show, in display order: degree order (1 → 7°) after chips or presets, or
+ * the typed order after a custom sequence.
+ */
+export const selectVisibleDegrees = createSelector([selectSelectedDegrees], (degrees) => [
+  ...new Set(degrees),
+]);
 
-/** The first preset that exactly matches the selection, or null. */
-export const selectActivePreset = createSelector([selectSelectedDegrees], (degrees) =>
-  findActivePreset(degrees),
+/** True when the columns follow a typed sequence rather than degree order. */
+export const selectIsCustomOrder = createSelector([selectSelectedDegrees], (degrees) => {
+  const sorted = sortDegrees(degrees);
+  return degrees.length !== sorted.length || degrees.some((id, index) => id !== sorted[index]);
+});
+
+/** The first preset that exactly matches the selection (in degree order), or null. */
+export const selectActivePreset = createSelector(
+  [selectSelectedDegrees, selectIsCustomOrder],
+  (degrees, isCustomOrder) => (isCustomOrder ? null : findActivePreset(degrees)),
 );
 
 /** Every preset that exactly matches the selection (1·4·5 and major share a selection). */
-export const selectMatchingPresets = createSelector([selectSelectedDegrees], (degrees) =>
-  PRESETS.filter((preset) => matchesPreset(degrees, preset)).map((preset) => preset.id),
+export const selectMatchingPresets = createSelector(
+  [selectSelectedDegrees, selectIsCustomOrder],
+  (degrees, isCustomOrder) =>
+    isCustomOrder
+      ? []
+      : PRESETS.filter((preset) => matchesPreset(degrees, preset)).map((preset) => preset.id),
 );

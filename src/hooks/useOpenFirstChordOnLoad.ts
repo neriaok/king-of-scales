@@ -14,7 +14,7 @@ export const useOpenFirstChordOnLoad = (): void => {
     if (hasRun.current) return;
     hasRun.current = true;
     if (selected) return;
-    const [firstRow] = buildTable(visibleDegrees);
+    const [firstRow] = buildTable(visibleDegrees, 'given');
     const firstCell = firstRow?.cells[0];
     if (!firstRow || !firstCell) return;
     dispatch(
