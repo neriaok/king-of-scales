@@ -20,6 +20,9 @@
   --color-key-fg: #f2f4f6;
   --color-capo-bg: #e1e6eb;
 
+  /* Form errors */
+  --color-error: #b3261e;
+
   /* Accent: focus rings, stars, play button, highlighted piano keys */
   --color-accent: #d9822b;
   --color-on-accent: #1b1208;
@@ -77,6 +80,7 @@
     --color-key-fg: #12161b;
     --color-capo-bg: #232b35;
     --color-accent: #f0a04b;
+    --color-error: #ff8a80;
     --color-wood: #2a2620;
     --color-fret: #5d6670;
     --color-nut: #e7ebef;
@@ -103,6 +107,7 @@
   --color-key-fg: #12161b;
   --color-capo-bg: #232b35;
   --color-accent: #f0a04b;
+  --color-error: #ff8a80;
   --color-wood: #2a2620;
   --color-fret: #5d6670;
   --color-nut: #e7ebef;
