@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { makeStore } from '../../store/store';
 import { STORAGE_KEY, loadPersistedUi, parsePersistedUi, savePersistedUi } from './persistence';
-import { applyPreset, selectChord, setInstrument, toggleDegree } from './uiSlice';
+import { applyPreset, selectChord, setInstrument, setLanguage, toggleDegree } from './uiSlice';
 
 const ALL = ['1', '2m', '3m', '4', '5', '6m', '7dim'];
 
@@ -13,14 +13,21 @@ afterEach(() => {
 
 describe('parsePersistedUi', () => {
   it('accepts a valid value and sorts the degrees', () => {
-    expect(parsePersistedUi({ selectedDegrees: ['5', '1'], instrument: 'piano' })).toEqual({
+    expect(
+      parsePersistedUi({ selectedDegrees: ['5', '1'], instrument: 'piano', language: 'en' }),
+    ).toEqual({
       selectedDegrees: ['1', '5'],
       instrument: 'piano',
+      language: 'en',
     });
   });
 
   it.each([null, undefined, 'x', 42, [], {}])('falls back to defaults for %j', (raw) => {
-    expect(parsePersistedUi(raw)).toEqual({ selectedDegrees: ALL, instrument: 'guitar' });
+    expect(parsePersistedUi(raw)).toEqual({
+      selectedDegrees: ALL,
+      instrument: 'guitar',
+      language: 'he',
+    });
   });
 
   it('falls back to all 7 degrees when the stored selection is empty or invalid', () => {
@@ -36,6 +43,10 @@ describe('parsePersistedUi', () => {
     ]);
   });
 
+  it('falls back to Hebrew for an unknown language', () => {
+    expect(parsePersistedUi({ selectedDegrees: ['1'], language: 'fr' }).language).toBe('he');
+  });
+
   it('falls back to guitar for an unknown instrument', () => {
     expect(parsePersistedUi({ selectedDegrees: ['1'], instrument: 'banjo' }).instrument).toBe(
       'guitar',
@@ -45,13 +56,21 @@ describe('parsePersistedUi', () => {
 
 describe('load and save', () => {
   it('round-trips through localStorage', () => {
-    savePersistedUi({ selectedDegrees: ['1', '4', '5'], instrument: 'piano' });
-    expect(loadPersistedUi()).toEqual({ selectedDegrees: ['1', '4', '5'], instrument: 'piano' });
+    savePersistedUi({ selectedDegrees: ['1', '4', '5'], instrument: 'piano', language: 'en' });
+    expect(loadPersistedUi()).toEqual({
+      selectedDegrees: ['1', '4', '5'],
+      instrument: 'piano',
+      language: 'en',
+    });
   });
 
   it('survives corrupt JSON', () => {
     window.localStorage.setItem(STORAGE_KEY, '{not json');
-    expect(loadPersistedUi()).toEqual({ selectedDegrees: ALL, instrument: 'guitar' });
+    expect(loadPersistedUi()).toEqual({
+      selectedDegrees: ALL,
+      instrument: 'guitar',
+      language: 'he',
+    });
   });
 
   it('survives storage that throws', () => {
@@ -61,27 +80,43 @@ describe('load and save', () => {
     vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
       throw new Error('blocked');
     });
-    expect(loadPersistedUi()).toEqual({ selectedDegrees: ALL, instrument: 'guitar' });
-    expect(() => savePersistedUi({ selectedDegrees: ['1'], instrument: 'guitar' })).not.toThrow();
+    expect(loadPersistedUi()).toEqual({
+      selectedDegrees: ALL,
+      instrument: 'guitar',
+      language: 'he',
+    });
+    expect(() =>
+      savePersistedUi({ selectedDegrees: ['1'], instrument: 'guitar', language: 'he' }),
+    ).not.toThrow();
   });
 });
 
 describe('store persistence middleware', () => {
   it('restores the saved selection and instrument on start', () => {
-    savePersistedUi({ selectedDegrees: ['2m', '6m'], instrument: 'piano' });
+    savePersistedUi({ selectedDegrees: ['2m', '6m'], instrument: 'piano', language: 'en' });
     const { ui } = makeStore().getState();
     expect(ui.selectedDegrees).toEqual(['2m', '6m']);
     expect(ui.instrument).toBe('piano');
+    expect(ui.language).toBe('en');
     expect(ui.selectedChord).toBeNull();
   });
 
   it('saves when the selection or instrument changes', () => {
     const store = makeStore();
     store.dispatch(applyPreset('oneFourFive'));
-    expect(stored()).toEqual({ selectedDegrees: ['1', '4', '5'], instrument: 'guitar' });
+    expect(stored()).toEqual({
+      selectedDegrees: ['1', '4', '5'],
+      instrument: 'guitar',
+      language: 'he',
+    });
     store.dispatch(toggleDegree('6m'));
     store.dispatch(setInstrument('piano'));
-    expect(stored()).toEqual({ selectedDegrees: ['1', '4', '5', '6m'], instrument: 'piano' });
+    store.dispatch(setLanguage('en'));
+    expect(stored()).toEqual({
+      selectedDegrees: ['1', '4', '5', '6m'],
+      instrument: 'piano',
+      language: 'en',
+    });
   });
 
   it('does not persist the open chord', () => {

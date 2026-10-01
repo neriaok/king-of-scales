@@ -1,6 +1,7 @@
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSelector, createSlice } from '@reduxjs/toolkit';
 import type { DegreeId, PresetId } from '../../lib/music/degrees';
+import type { Language } from '../../i18n/messages';
 import {
   DEGREE_IDS,
   PRESETS,
@@ -30,12 +31,14 @@ export interface SelectedChord {
 export interface UiState {
   selectedDegrees: DegreeId[];
   instrument: Instrument;
+  language: Language;
   selectedChord: SelectedChord | null;
 }
 
 export const initialUiState: UiState = {
   selectedDegrees: [...DEGREE_IDS],
   instrument: 'guitar',
+  language: 'he',
   selectedChord: null,
 };
 
@@ -69,6 +72,9 @@ const uiSlice = createSlice({
     setInstrument: (state, action: PayloadAction<Instrument>) => {
       state.instrument = action.payload;
     },
+    setLanguage: (state, action: PayloadAction<Language>) => {
+      state.language = action.payload;
+    },
     selectChord: (state, action: PayloadAction<SelectedChord>) => {
       state.selectedChord = action.payload;
     },
@@ -78,7 +84,7 @@ const uiSlice = createSlice({
   },
 });
 
-export const { toggleDegree, applyPreset, setInstrument, selectChord, closeChord } =
+export const { toggleDegree, applyPreset, setInstrument, setLanguage, selectChord, closeChord } =
   uiSlice.actions;
 
 export default uiSlice.reducer;
@@ -89,6 +95,7 @@ interface StateWithUi {
 
 export const selectSelectedDegrees = (state: StateWithUi): DegreeId[] => state.ui.selectedDegrees;
 export const selectInstrument = (state: StateWithUi): Instrument => state.ui.instrument;
+export const selectLanguage = (state: StateWithUi): Language => state.ui.language;
 export const selectSelectedChord = (state: StateWithUi): SelectedChord | null =>
   state.ui.selectedChord;
 

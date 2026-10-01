@@ -9,6 +9,7 @@ import reducer, {
   selectMatchingPresets,
   selectVisibleDegrees,
   setInstrument,
+  setLanguage,
   toggleDegree,
 } from './uiSlice';
 
@@ -17,10 +18,11 @@ const reduce = (...actions: Parameters<typeof reducer>[1][]): UiState =>
   actions.reduce(reducer, initialUiState);
 
 describe('uiSlice', () => {
-  it('starts with all 7 degrees, guitar and no open chord', () => {
+  it('starts with all 7 degrees, guitar, Hebrew and no open chord', () => {
     expect(initialUiState).toEqual({
       selectedDegrees: ['1', '2m', '3m', '4', '5', '6m', '7dim'],
       instrument: 'guitar',
+      language: 'he',
       selectedChord: null,
     });
   });
@@ -44,6 +46,10 @@ describe('uiSlice', () => {
   it('applies presets in degree order', () => {
     expect(reduce(applyPreset('pop')).selectedDegrees).toEqual(['1', '4', '5', '6m']);
     expect(reduce(applyPreset('oneFourFive')).selectedDegrees).toEqual(['1', '4', '5']);
+  });
+
+  it('sets the language', () => {
+    expect(reduce(setLanguage('en')).language).toBe('en');
   });
 
   it('sets the instrument', () => {
