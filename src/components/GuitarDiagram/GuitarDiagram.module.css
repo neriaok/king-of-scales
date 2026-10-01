@@ -1,0 +1,54 @@
+.diagram {
+  display: block;
+  width: 100%;
+  height: auto;
+  direction: ltr;
+  font-family: var(--font-body);
+}
+
+.wood {
+  fill: var(--color-wood);
+}
+
+.fret {
+  stroke: var(--color-fret);
+  stroke-width: 1.5;
+}
+
+.nut {
+  stroke: var(--color-nut);
+  stroke-width: 6;
+}
+
+.string {
+  stroke: var(--color-fret);
+}
+
+.dot {
+  fill: var(--color-dot);
+}
+
+.open {
+  fill: none;
+  stroke: var(--color-ink);
+  stroke-width: 2;
+}
+
+.muted,
+.position {
+  fill: var(--color-muted);
+  font-weight: 700;
+}
+
+.muted {
+  font-size: 16px;
+}
+
+.position {
+  font-size: 15px;
+}
+
+.stringName {
+  fill: var(--color-muted);
+  font-size: 12px;
+}

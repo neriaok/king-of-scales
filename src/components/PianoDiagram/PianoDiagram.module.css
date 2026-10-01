@@ -1,0 +1,32 @@
+.diagram {
+  display: block;
+  width: 100%;
+  height: auto;
+  direction: ltr;
+  font-family: var(--font-body);
+}
+
+.white {
+  fill: var(--color-white-key);
+  stroke: var(--color-fret);
+}
+
+.black {
+  fill: var(--color-black-key);
+  stroke: var(--color-black-key);
+}
+
+.white.on,
+.black.on {
+  fill: var(--color-accent);
+}
+
+.name {
+  fill: var(--color-on-accent);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.small {
+  font-size: 10px;
+}
