@@ -12,31 +12,54 @@ import { LETTER_PITCH_CLASS, isLetter, mod12 } from './notes';
 export interface TypedChord {
   /** The chord as the user typed it. */
   text: string;
+  /** The chord written the usual way, e.g. `Am` for `AM` or `am`. */
+  name: string;
   pitchClass: number;
   quality: ChordQuality;
 }
 
-const ROOT = /^([A-Ga-g])(##|bb|#|b|♯|♭)?(.*)$/u;
+/**
+ * Root, optional accidental, then the rest. An uppercase `B` right after the root is read as
+ * a flat (phones often capitalise everything: `AB` → A♭, `EBM` → E♭m), since a chord name
+ * never has a second note letter there.
+ */
+const ROOT = /^([A-Ga-g])(##|bb|#|b|♯|♭|B)?(.*)$/u;
 const ACCIDENTALS: Readonly<Record<string, number>> = {
   '': 0,
   '#': 1,
   '♯': 1,
   '##': 2,
   b: -1,
+  B: -1,
   '♭': -1,
   bb: -2,
 };
+const ACCIDENTAL_TEXT: Readonly<Record<number, string>> = {
+  [-2]: 'bb',
+  [-1]: 'b',
+  0: '',
+  1: '#',
+  2: '##',
+};
+const QUALITY_TEXT: Readonly<Record<ChordQuality, string>> = {
+  major: '',
+  minor: 'm',
+  diminished: '°',
+};
 
 /**
- * Reads the triad quality from whatever follows the root, ignoring extensions:
- * `m`, `m7`, `min` → minor; `dim`, `°`, `m7b5`, `ø` → diminished; anything else
- * (``, `7`, `maj7`, `sus4`, `add9`, `6`) → major.
+ * Reads the triad quality from whatever follows the root, ignoring extensions and case:
+ * `m`, `M`, `min`, `m7` → minor; `dim`, `°`, `m7b5`, `ø` → diminished; ``, `7`, `maj7`,
+ * `Δ`, `sus4`, `add9`, `6`, `/E` → major. Jazz's capital `M7` (major seventh) is honoured
+ * only in mixed-case input like `CM7`; when everything is uppercase (`AM`, `AM7`) the keyboard
+ * capitalised it and `M` means minor.
  */
-const qualityOf = (suffix: string): ChordQuality | null => {
+const qualityOf = (suffix: string, isAllCaps: boolean): ChordQuality | null => {
   const rest = suffix.trim();
   if (/^(dim|°|o|ø|m7b5|m7♭5|min7b5)/iu.test(rest)) return 'diminished';
-  if (/^maj|^M(?!in)|^Δ/u.test(rest)) return 'major';
-  if (/^(m|min)(?!aj)/u.test(rest)) return 'minor';
+  if (/^(maj|Δ)/iu.test(rest)) return 'major';
+  if (!isAllCaps && /^M(6|7|9|11|13)/u.test(rest)) return 'major';
+  if (/^(min|m)/iu.test(rest)) return 'minor';
   if (/^(aug|\+)/iu.test(rest)) return null;
   if (rest === '' || /^(7|6|9|11|13|sus|add|\/|\()/iu.test(rest)) return 'major';
   return null;
@@ -48,10 +71,13 @@ export const parseTypedChord = (text: string): TypedChord | null => {
   const letterText = match?.[1]?.toUpperCase();
   if (!match || letterText === undefined || !isLetter(letterText)) return null;
   const accidental = ACCIDENTALS[match[2] ?? ''];
-  const quality = qualityOf(match[3] ?? '');
+  const trimmed = text.trim();
+  const isAllCaps = trimmed.length > 1 && trimmed === trimmed.toUpperCase();
+  const quality = qualityOf(match[3] ?? '', isAllCaps);
   if (accidental === undefined || quality === null) return null;
   return {
     text: text.trim(),
+    name: `${letterText}${ACCIDENTAL_TEXT[accidental] ?? ''}${QUALITY_TEXT[quality]}`,
     pitchClass: mod12(LETTER_PITCH_CLASS[letterText as Letter] + accidental),
     quality,
   };

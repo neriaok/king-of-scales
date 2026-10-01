@@ -82,7 +82,7 @@ const SequenceInput: FC = () => {
     const alternatives = candidates.filter((candidate) => candidate.matched === best.matched);
     showConversion(
       best,
-      parsed.chords.map((chord) => chord.text),
+      parsed.chords.map((chord) => chord.name),
       alternatives,
     );
   };
@@ -123,7 +123,7 @@ const SequenceInput: FC = () => {
           className={styles.input}
           type="text"
           autoComplete="off"
-          autoCapitalize="characters"
+          autoCapitalize="none"
           spellCheck={false}
           dir="ltr"
           placeholder={messages.sequence.placeholder}
