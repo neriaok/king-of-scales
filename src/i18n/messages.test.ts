@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { DEGREES, PRESETS } from '../lib/music/degrees';
+import { DEGREES } from '../lib/music/degrees';
+import { SEQUENCE_SUGGESTIONS } from '../lib/music/sequence';
 import type { Messages } from './messages';
 import { LANGUAGES, LANGUAGE_DIR, MESSAGES, isLanguage } from './messages';
 
@@ -7,9 +8,11 @@ const stringLeaves = (messages: Messages): string[] =>
   Object.values(messages).flatMap((value: unknown) => {
     if (typeof value === 'string') return [value];
     if (typeof value === 'function') return [String((value as (arg: string) => string)('C'))];
-    return Object.values(value as Record<string, unknown>).flatMap((inner) =>
-      typeof inner === 'string' ? [inner] : Object.values(inner as Record<string, string>),
-    );
+    return Object.values(value as Record<string, unknown>).flatMap((inner) => {
+      if (typeof inner === 'string') return [inner];
+      if (typeof inner === 'function') return [String((inner as (arg: string) => string)('C'))];
+      return Object.values(inner as Record<string, string>);
+    });
   });
 
 describe('messages', () => {
@@ -24,12 +27,11 @@ describe('messages', () => {
     expect(stringLeaves(MESSAGES[language]).every((text) => text.trim().length > 0)).toBe(true);
   });
 
-  it.each(LANGUAGES)('%s labels every preset and every role', (language) => {
+  it.each(LANGUAGES)('%s labels every suggestion and every role', (language) => {
     const messages = MESSAGES[language];
-    PRESETS.forEach((preset) => {
-      const label = messages.presets[preset.id];
-      expect(label.name ?? label.sequence).toBeTruthy();
-    });
+    SEQUENCE_SUGGESTIONS.forEach((suggestion) =>
+      expect(messages.sequence.suggestions[suggestion.id]).toBeTruthy(),
+    );
     DEGREES.filter((degree) => degree.role).forEach((degree) =>
       expect(messages.roles[degree.id]).toBeTruthy(),
     );
@@ -42,12 +44,6 @@ describe('messages', () => {
       '5': 'מתח · דומיננטה',
       '6m': 'מינור מקביל',
     });
-  });
-
-  it('keeps the Hebrew preset labels from the spec', () => {
-    const text = (id: keyof typeof MESSAGES.he.presets) =>
-      [MESSAGES.he.presets[id].name, MESSAGES.he.presets[id].sequence].filter(Boolean).join(' ');
-    expect(PRESETS.map((preset) => text(preset.id))).toEqual(PRESETS.map((preset) => preset.label));
   });
 
   it('builds column subtitles', () => {
