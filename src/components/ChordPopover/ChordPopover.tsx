@@ -13,12 +13,14 @@ import {
 import { useAnchoredPosition } from '../../hooks/useAnchoredPosition';
 import { useAppDispatch, useAppSelector } from '../../hooks/useAppDispatch';
 import { useMessages } from '../../hooks/useMessages';
+import { chordPlayer } from '../../lib/music/audio';
 import { diagramWindow, getGuitarVoicing } from '../../lib/music/guitarVoicings';
 import { formatChord, parseChord } from '../../lib/music/notes';
 import { pianoVoicing } from '../../lib/music/pianoVoicing';
 import { spellTriad } from '../../lib/music/spelling';
 import GuitarDiagram from '../GuitarDiagram';
 import PianoDiagram from '../PianoDiagram';
+import PlayButton from '../PlayButton';
 import SegmentedControl from '../SegmentedControl';
 import styles from './ChordPopover.module.css';
 
@@ -152,6 +154,10 @@ const ChordPopover: FC = () => {
           value={instrument}
           onChange={handleInstrumentChange}
           size="sm"
+        />
+        <PlayButton
+          label={messages.play}
+          onPlay={() => chordPlayer.play(chord, instrument, voicing)}
         />
       </div>
       <p className={styles.tip}>{tip}</p>

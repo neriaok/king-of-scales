@@ -1,8 +1,9 @@
 import { act, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import App from '../../app/App';
 import { applyPreset, initialUiState } from '../../features/ui/uiSlice';
+import { chordPlayer } from '../../lib/music/audio';
 import { renderWithStore } from '../../test/renderWithStore';
 
 const chordButton = (keyName: string, chord: string) => {
@@ -131,6 +132,30 @@ describe('ChordPopover', () => {
       store.dispatch(applyPreset('minor'));
     });
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('plays the chord on the selected instrument from the ▶ button', async () => {
+    const user = userEvent.setup();
+    const play = vi.spyOn(chordPlayer, 'play').mockImplementation(() => undefined);
+    renderApp();
+    expect(play).not.toHaveBeenCalled();
+    const dialog = screen.getByRole('dialog', { name: 'C' });
+    await user.click(within(dialog).getByRole('button', { name: '▶ נגן' }));
+    expect(play).toHaveBeenCalledWith(expect.objectContaining({ symbol: 'C' }), 'guitar', [
+      null,
+      3,
+      2,
+      0,
+      1,
+      0,
+    ]);
+    await user.click(within(dialog).getByRole('button', { name: 'פסנתר' }));
+    await user.click(within(dialog).getByRole('button', { name: '▶ נגן' }));
+    expect(play).toHaveBeenLastCalledWith(
+      expect.objectContaining({ symbol: 'C' }),
+      'piano',
+      expect.any(Array),
+    );
   });
 
   it('renders in English', () => {
