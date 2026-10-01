@@ -1,47 +1,75 @@
 import { describe, expect, it, vi } from 'vitest';
-import { ChordPlayer, STRUM_DELAY, midiToFrequency } from './audio';
+import { ChordPlayer, GUITAR_NOTE_SECONDS, STRUM_DELAY, midiToFrequency } from './audio';
 import { getGuitarVoicing } from './guitarVoicings';
 import { parseChord } from './notes';
 
 interface Started {
-  frequency: number;
-  type: OscillatorType;
+  kind: 'oscillator' | 'buffer';
+  frequency?: number;
+  length?: number;
   at: number;
 }
 
+const SAMPLE_RATE = 8000;
+
 const createFakeContext = (state: AudioContextState = 'running') => {
   const started: Started[] = [];
+  const connections: [unknown, unknown][] = [];
   const param = () => ({
     value: 0,
     setValueAtTime: vi.fn(),
     linearRampToValueAtTime: vi.fn(),
     exponentialRampToValueAtTime: vi.fn(),
   });
-  const node = <T extends object>(extra: T) => ({
-    ...extra,
-    connect: vi.fn(function (this: unknown, next: unknown) {
-      return next;
-    }),
-  });
+  const node = <T extends object>(extra: T) => {
+    const self = {
+      ...extra,
+      connect: (next: unknown) => {
+        connections.push([self, next]);
+        return next;
+      },
+    };
+    return self;
+  };
+  const destination = { name: 'destination' };
   const context = {
     state,
+    sampleRate: SAMPLE_RATE,
     currentTime: 1,
-    destination: {},
+    destination,
     resume: vi.fn(() => Promise.resolve()),
     createOscillator: () => {
       const oscillator = node({
         type: 'sine' as OscillatorType,
         frequency: param(),
         start: (at: number) =>
-          started.push({ frequency: oscillator.frequency.value, type: oscillator.type, at }),
+          started.push({ kind: 'oscillator', frequency: oscillator.frequency.value, at }),
         stop: vi.fn(),
       });
       return oscillator;
     },
-    createBiquadFilter: () => node({ type: 'allpass', frequency: param() }),
+    createBuffer: (_channels: number, length: number) => {
+      const data = new Float32Array(length);
+      return { length, getChannelData: () => data };
+    },
+    createBufferSource: () => {
+      const source = node({
+        buffer: null as { length: number } | null,
+        start: (at: number) => started.push({ kind: 'buffer', length: source.buffer?.length, at }),
+      });
+      return source;
+    },
+    createBiquadFilter: () =>
+      node({ type: 'allpass', frequency: param(), Q: param(), gain: param() }),
     createGain: () => node({ gain: param() }),
   };
-  return { context: context as unknown as AudioContext, started, resume: context.resume };
+  return {
+    context: context as unknown as AudioContext,
+    started,
+    connections,
+    destination,
+    resume: context.resume,
+  };
 };
 
 describe('ChordPlayer', () => {
@@ -53,20 +81,29 @@ describe('ChordPlayer', () => {
     expect(player.isReady).toBe(false);
 
     player.playPiano(parseChord('C'));
-    player.playPiano(parseChord('G'));
+    player.playGuitar(getGuitarVoicing(parseChord('G')));
     expect(factory).toHaveBeenCalledTimes(1);
     expect(player.isReady).toBe(true);
   });
 
-  it('strums the guitar voicing low to high, 35 ms apart', () => {
+  it('strums one plucked string per sounding string, low to high, 35 ms apart', () => {
     const fake = createFakeContext();
-    const player = new ChordPlayer(() => fake.context);
-    player.playGuitar(getGuitarVoicing(parseChord('C'))); // x 3 2 0 1 0
+    new ChordPlayer(() => fake.context).playGuitar(getGuitarVoicing(parseChord('C'))); // x32010
 
-    expect(fake.started.map((s) => s.frequency)).toEqual([48, 52, 55, 60, 64].map(midiToFrequency));
+    expect(fake.started).toHaveLength(5);
+    expect(fake.started.every((s) => s.kind === 'buffer')).toBe(true);
+    expect(fake.started.every((s) => s.length === SAMPLE_RATE * GUITAR_NOTE_SECONDS)).toBe(true);
     const gaps = fake.started.slice(1).map((s, i) => s.at - (fake.started[i]?.at ?? 0));
     gaps.forEach((gap) => expect(gap).toBeCloseTo(STRUM_DELAY));
-    expect(fake.started.every((s) => s.type === 'sawtooth')).toBe(true);
+  });
+
+  it('routes the strings through the body filters to the speakers', () => {
+    const fake = createFakeContext();
+    new ChordPlayer(() => fake.context).playGuitar(getGuitarVoicing(parseChord('Em')));
+    const toSpeakers = fake.connections.filter(([, to]) => to === fake.destination);
+    expect(toSpeakers).toHaveLength(1);
+    const [lastFilter] = toSpeakers[0] ?? [];
+    expect(lastFilter).toMatchObject({ type: 'lowpass' });
   });
 
   it('plays the piano triad around C4 with the root an octave lower, together', () => {
