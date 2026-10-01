@@ -6,7 +6,7 @@ those chords in all 12 keys, with guitar and piano diagrams you can hear.
 
 > **Live demo:** https://king-of-scales.vercel.app/ (deployed on Vercel; every PR gets a preview deployment)
 
-![Screenshot placeholder](docs/screenshot.png)
+![King of Scales: the chord table with the popover open on G](docs/screenshot.png)
 
 ## Features
 
@@ -21,7 +21,10 @@ those chords in all 12 keys, with guitar and piano diagrams you can hear.
   gives the capo fret for playing the key with C shapes.
 - **Chord popover.** Correctly spelled chord tones, a guitar or piano diagram, a play button
   (Web Audio) and a short tip. On phones it becomes a bottom sheet.
-- **Hebrew, RTL, light and dark themes**, keyboard accessible, and your selection is remembered.
+- **Hebrew and English.** Hebrew (right to left) by default, English (left to right) one tap away.
+  Chord names, the table and the diagrams always read left to right.
+- **Light and dark themes**, keyboard accessible (checked with axe, WCAG 2.1 AA), and your
+  selection, instrument and language are remembered.
 
 ## Stack
 
@@ -51,9 +54,10 @@ src/
   components/    Header, SegmentedControl, DegreePicker, ChordTable, ChordCell,
                  ChordPopover, GuitarDiagram, PianoDiagram, PlayButton, Legend
   features/ui/   ui slice and localStorage persistence
-  lib/music/     framework-free music theory (+ unit tests)
+  i18n/          typed Hebrew and English messages
+  lib/music/     framework-free music theory and audio (+ unit tests)
   store/         Redux store
-  hooks/         typed Redux hooks, popover positioning
+  hooks/         typed Redux hooks, messages, popover positioning
   styles/        design tokens and global styles
 ```
 
@@ -72,9 +76,19 @@ So the table is **generated, not hard-coded**: `lib/music` takes each of the 12 
 formula, spells every chord with the right letter names (in F♯ the 7° is E♯°, not F°), and returns
 only the columns you selected. All of it is pure TypeScript with unit tests, separate from React.
 
+### Notes on the spec
+
+- The presets "1 · 4 · 5" and "מז׳ור" select the same degrees, so both show as pressed together.
+- Clicking the header's instrument switch keeps the popover open, so both switches can be seen
+  changing together.
+
 ## Next ideas
 
-_None yet._
+- Minor keys (natural/harmonic minor) alongside the major-key table
+- Seventh chords (maj7, m7, 7, m7♭5) as an optional column set
+- Left-handed guitar diagrams
+- A practice mode: play a progression and name the chords by ear
+- Transpose a song: type chords in one key and read them in another
 
 ## License
 
