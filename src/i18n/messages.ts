@@ -34,17 +34,12 @@ export interface Messages {
     suggestionsLabel: string;
     suggestions: Record<SuggestionId, string>;
   };
+  /** Shown when the sequence box gets chords instead of numbers. */
   converter: {
-    label: string;
-    placeholder: string;
-    help: string;
-    submit: string;
-    errorEmpty: string;
     errorInvalid: (chords: string) => string;
     noKey: string;
     inKey: (key: string) => string;
     outsideKey: string;
-    showInTable: string;
     otherKeys: string;
   };
   tableCaption: string;
@@ -77,11 +72,11 @@ const he: Messages = {
   instruments: { guitar: 'גיטרה', piano: 'פסנתר' },
   sequence: {
     label: 'רצף משלך',
-    placeholder: 'לדוגמה 1-6-4-5',
-    help: 'ספרות 1 עד 7. העמודות יוצגו בסדר שהקלדת.',
+    placeholder: 'לדוגמה 1-6-4-5 או Am F C G',
+    help: 'ספרות 1 עד 7, או אקורדים שיומרו למספרים לפי הסולם שלהם. העמודות יוצגו בסדר שהקלדת.',
     submit: 'הצג',
-    errorEmpty: 'הקלד לפחות ספרה אחת בין 1 ל-7',
-    errorInvalid: (characters) => `אפשר להשתמש רק בספרות 1 עד 7 (לא: ${characters})`,
+    errorEmpty: 'הקלד ספרות 1 עד 7 או אקורדים',
+    errorInvalid: (characters) => `אפשר להשתמש בספרות 1 עד 7 או באקורדים (לא: ${characters})`,
     duplicates: 'מספר שחזר על עצמו מוצג פעם אחת',
     suggestionsLabel: 'רצפים נפוצים',
     suggestions: {
@@ -94,16 +89,10 @@ const he: Messages = {
     },
   },
   converter: {
-    label: 'המרת אקורדים למספרים',
-    placeholder: 'לדוגמה Am F C G',
-    help: 'הקלד אקורדים עם רווח ביניהם. אקורד בודד יראה את המספר שלו בכל סולם שבו הוא מופיע.',
-    submit: 'המר',
-    errorEmpty: 'הקלד לפחות אקורד אחד',
     errorInvalid: (chords) => `לא הצלחתי לזהות: ${chords}`,
     noKey: 'האקורדים האלה לא שייכים לאף סולם מז׳ורי',
     inKey: (key) => `בסולם ${key}`,
     outsideKey: '? = אקורד מחוץ לסולם',
-    showInTable: 'הצג בטבלה',
     otherKeys: 'סולמות אפשריים נוספים',
   },
   tableCaption: 'אקורדים לפי דרגה בכל 12 הסולמות',
@@ -141,11 +130,11 @@ const en: Messages = {
   instruments: { guitar: 'Guitar', piano: 'Piano' },
   sequence: {
     label: 'Your own sequence',
-    placeholder: 'e.g. 1-6-4-5',
-    help: 'Digits 1 to 7. Columns appear in the order you type.',
+    placeholder: 'e.g. 1-6-4-5 or Am F C G',
+    help: 'Digits 1 to 7, or chords that are converted to numbers in their key. Columns appear in the order you type.',
     submit: 'Show',
-    errorEmpty: 'Type at least one digit from 1 to 7',
-    errorInvalid: (characters) => `Only digits 1 to 7 can be used (not: ${characters})`,
+    errorEmpty: 'Type digits 1 to 7 or chords',
+    errorInvalid: (characters) => `Use digits 1 to 7 or chords (not: ${characters})`,
     duplicates: 'A repeated number is shown once',
     suggestionsLabel: 'Common progressions',
     suggestions: {
@@ -158,16 +147,10 @@ const en: Messages = {
     },
   },
   converter: {
-    label: 'Chords to numbers',
-    placeholder: 'e.g. Am F C G',
-    help: 'Type chords separated by spaces. A single chord shows its number in every key it belongs to.',
-    submit: 'Convert',
-    errorEmpty: 'Type at least one chord',
     errorInvalid: (chords) => `Could not read: ${chords}`,
     noKey: 'These chords don’t belong to any major key',
     inKey: (key) => `In ${key}`,
     outsideKey: '? = chord outside the key',
-    showInTable: 'Show in table',
     otherKeys: 'Other possible keys',
   },
   tableCaption: 'Chords by scale degree in all 12 keys',
