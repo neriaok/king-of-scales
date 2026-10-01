@@ -77,9 +77,20 @@ export interface TableRow {
   cells: TableCell[];
 }
 
-/** One row per key with exactly the selected degrees as columns, always in degree order. */
-export const buildTable = (selectedDegrees: readonly DegreeId[]): TableRow[] => {
-  const columns = DEGREES.filter((degree) => sortDegrees(selectedDegrees).includes(degree.id));
+export type ColumnOrder = 'degree' | 'given';
+
+/**
+ * One row per key with exactly the selected degrees as columns. By default the columns are
+ * in degree order (1 → 7°); `'given'` keeps the selection's own order, for a typed sequence.
+ */
+export const buildTable = (
+  selectedDegrees: readonly DegreeId[],
+  order: ColumnOrder = 'degree',
+): TableRow[] => {
+  const ids = order === 'degree' ? sortDegrees(selectedDegrees) : [...new Set(selectedDegrees)];
+  const columns = ids
+    .map((id) => DEGREES.find((degree) => degree.id === id))
+    .filter((degree): degree is Degree => degree !== undefined);
   return KEYS.map((key) => ({
     key,
     cells: columns.map((degree) => ({ degreeId: degree.id, chord: diatonicChord(key, degree) })),

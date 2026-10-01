@@ -90,6 +90,17 @@ describe('buildTable', () => {
     expect(symbolsOf(table[0] ?? { cells: [] })).toEqual(['C', 'F', 'G', 'Am']);
   });
 
+  it('can keep the given order for a typed sequence', () => {
+    const table = buildTable(['6m', '4', '1', '5'], 'given');
+    expect(symbolsOf(table[0] ?? { cells: [] })).toEqual(['Am', 'F', 'C', 'G']);
+    expect(symbolsOf(table.find((r) => r.key.name === 'G') ?? { cells: [] })).toEqual([
+      'Em',
+      'C',
+      'G',
+      'D',
+    ]);
+  });
+
   it('tags each cell with its degree', () => {
     const [first] = buildTable(['2m', '7dim']);
     expect(first?.cells).toEqual([
