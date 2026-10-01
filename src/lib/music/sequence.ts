@@ -42,7 +42,7 @@ export const parseDegreeSequence = (text: string): SequenceResult => {
 export const formatDegreeSequence = (degrees: readonly DegreeId[]): string =>
   degrees.map((id) => String(DEGREE_IDS.indexOf(id) + 1)).join('-');
 
-export type SuggestionId = 'pop' | 'fifties' | 'sensitive' | 'jazz' | 'blues';
+export type SuggestionId = 'all' | 'pop' | 'fifties' | 'sensitive' | 'jazz' | 'blues';
 
 export interface SequenceSuggestion {
   id: SuggestionId;
@@ -52,6 +52,7 @@ export interface SequenceSuggestion {
 
 /** Common progressions, offered next to the sequence input in playing order. */
 export const SEQUENCE_SUGGESTIONS: readonly SequenceSuggestion[] = [
+  { id: 'all', degrees: DEGREE_IDS },
   { id: 'pop', degrees: ['1', '5', '6m', '4'] },
   { id: 'fifties', degrees: ['1', '6m', '4', '5'] },
   { id: 'sensitive', degrees: ['6m', '4', '1', '5'] },

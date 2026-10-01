@@ -59,6 +59,7 @@ describe('formatDegreeSequence', () => {
 describe('SEQUENCE_SUGGESTIONS', () => {
   it('offers common progressions in playing order', () => {
     expect(SEQUENCE_SUGGESTIONS.map((s) => formatDegreeSequence(s.degrees))).toEqual([
+      '1-2-3-4-5-6-7',
       '1-5-6-4',
       '1-6-4-5',
       '6-4-1-5',
