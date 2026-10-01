@@ -1,9 +1,11 @@
 import type { ListenerMiddlewareInstance } from '@reduxjs/toolkit';
 import { isAnyOf } from '@reduxjs/toolkit';
+import type { Language } from '../../i18n/messages';
+import { isLanguage } from '../../i18n/messages';
 import type { DegreeId } from '../../lib/music/degrees';
 import { DEGREE_IDS, isDegreeId, sortDegrees } from '../../lib/music/degrees';
 import type { Instrument, UiState } from './uiSlice';
-import { applyPreset, isInstrument, setInstrument, toggleDegree } from './uiSlice';
+import { applyPreset, isInstrument, setInstrument, setLanguage, toggleDegree } from './uiSlice';
 
 export const STORAGE_KEY = 'king-of-scales:ui';
 
@@ -11,13 +13,19 @@ export const STORAGE_KEY = 'king-of-scales:ui';
 export interface PersistedUi {
   selectedDegrees: DegreeId[];
   instrument: Instrument;
+  language: Language;
 }
 
-const DEFAULTS: PersistedUi = { selectedDegrees: [...DEGREE_IDS], instrument: 'guitar' };
+const DEFAULTS: PersistedUi = {
+  selectedDegrees: [...DEGREE_IDS],
+  instrument: 'guitar',
+  language: 'he',
+};
 
 /**
  * Validates whatever was stored. Unknown degrees are dropped; if nothing valid is left
- * the selection falls back to all seven degrees. A bad instrument falls back to guitar.
+ * the selection falls back to all seven degrees. A bad instrument falls back to guitar and
+ * a bad language to Hebrew.
  */
 export const parsePersistedUi = (raw: unknown): PersistedUi => {
   if (typeof raw !== 'object' || raw === null) return { ...DEFAULTS };
@@ -29,6 +37,7 @@ export const parsePersistedUi = (raw: unknown): PersistedUi => {
   return {
     selectedDegrees: storedDegrees.length > 0 ? storedDegrees : [...DEFAULTS.selectedDegrees],
     instrument: isInstrument(record.instrument) ? record.instrument : DEFAULTS.instrument,
+    language: isLanguage(record.language) ? record.language : DEFAULTS.language,
   };
 };
 
@@ -53,14 +62,14 @@ interface StateWithUi {
   ui: UiState;
 }
 
-/** Saves the selection and instrument whenever an action changes them. */
+/** Saves the selection, instrument and language whenever an action changes them. */
 export const startUiPersistence = (
   listenerMiddleware: ListenerMiddlewareInstance<StateWithUi>,
 ): (() => void) =>
   listenerMiddleware.startListening({
-    matcher: isAnyOf(toggleDegree, applyPreset, setInstrument),
+    matcher: isAnyOf(toggleDegree, applyPreset, setInstrument, setLanguage),
     effect: (_action, api) => {
-      const { selectedDegrees, instrument } = api.getState().ui;
-      savePersistedUi({ selectedDegrees, instrument });
+      const { selectedDegrees, instrument, language } = api.getState().ui;
+      savePersistedUi({ selectedDegrees, instrument, language });
     },
   });
