@@ -1,0 +1,19 @@
+.play {
+  font-weight: 700;
+  font-size: 15px;
+  border: 0;
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  padding: 8px 18px;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: transform var(--duration-fast);
+}
+
+.play:hover {
+  filter: brightness(1.05);
+}
+
+.play:active {
+  transform: scale(0.97);
+}
