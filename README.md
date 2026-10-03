@@ -28,10 +28,19 @@ those chords in all 12 keys, with guitar and piano diagrams you can hear.
 - **Light and dark themes**, keyboard accessible (checked with axe, WCAG 2.1 AA), and your
   selection, instrument and language are remembered.
 
+## Install on your phone
+
+The app is a PWA: open https://king-of-scales.vercel.app/ and
+
+- **Android (Chrome):** tap "Install app" when offered, or ⋮ → _Add to Home screen_ / _Install app_
+- **iPhone (Safari):** Share → _Add to Home Screen_
+
+Once installed it opens full screen, has its own icon and works offline.
+
 ## Stack
 
 Vite · React 18 · TypeScript (strict) · Redux Toolkit · CSS Modules · Vitest + Testing Library ·
-ESLint + Prettier · Husky + lint-staged + commitlint · GitHub Actions (CI) · Vercel (hosting)
+ESLint + Prettier · Husky + lint-staged + commitlint · GitHub Actions (CI) · Vercel (hosting) · vite-plugin-pwa (installable, offline)
 
 ## Scripts
 
