@@ -14,10 +14,17 @@ const chordButton = (keyName: string, chord: string) => {
 };
 
 const renderApp = (ui = initialUiState) => renderWithStore(<App />, { preloadedState: { ui } });
+/** Renders the app with the popover already open on C, as if C had been clicked. */
+const renderAppOpenOnC = (ui = initialUiState) =>
+  renderApp({ ...ui, selectedChord: { symbol: 'C', keyName: 'C', degreeId: '1' } });
 
 describe('ChordPopover', () => {
-  it('opens on the first chord of the table on load', () => {
+  it('stays closed on load until a chord is clicked', async () => {
+    const user = userEvent.setup();
     renderApp();
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(chordButton('C', 'C')).toHaveAttribute('aria-expanded', 'false');
+    await user.click(chordButton('C', 'C'));
     const dialog = screen.getByRole('dialog', { name: 'C' });
     expect(within(dialog).getByText('מז׳ור')).toBeInTheDocument();
     expect(chordButton('C', 'C')).toHaveAttribute('aria-expanded', 'true');
@@ -38,7 +45,7 @@ describe('ChordPopover', () => {
   });
 
   it('explains × and ○ for open-position chords', () => {
-    renderApp();
+    renderAppOpenOnC();
     expect(within(screen.getByRole('dialog')).getByText(/לא לפרוט/)).toBeInTheDocument();
   });
 
@@ -51,7 +58,7 @@ describe('ChordPopover', () => {
 
   it('switches to the piano tip with the piano', async () => {
     const user = userEvent.setup();
-    renderApp();
+    renderAppOpenOnC();
     const dialog = screen.getByRole('dialog');
     await user.click(within(dialog).getByRole('button', { name: 'פסנתר' }));
     expect(within(dialog).getByText(/אגודל/)).toBeInTheDocument();
@@ -78,7 +85,7 @@ describe('ChordPopover', () => {
 
   it('closes on a click outside', async () => {
     const user = userEvent.setup();
-    renderApp();
+    renderAppOpenOnC();
     expect(screen.getByRole('dialog')).toBeInTheDocument();
     await user.click(screen.getByRole('heading', { level: 1 }));
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
@@ -86,7 +93,7 @@ describe('ChordPopover', () => {
 
   it('stays open on a click inside and toggles closed on a second click on the chord', async () => {
     const user = userEvent.setup();
-    renderApp();
+    renderAppOpenOnC();
     const dialog = screen.getByRole('dialog');
     await user.click(within(dialog).getByRole('heading'));
     expect(screen.getByRole('dialog')).toBeInTheDocument();
@@ -104,7 +111,7 @@ describe('ChordPopover', () => {
 
   it('keeps the instrument switch in sync between the header and the popover', async () => {
     const user = userEvent.setup();
-    renderApp();
+    renderAppOpenOnC();
     const header = screen.getByRole('banner');
     const dialog = screen.getByRole('dialog');
     const headerPiano = within(within(header).getByRole('group', { name: 'כלי' })).getByRole(
@@ -126,7 +133,7 @@ describe('ChordPopover', () => {
   });
 
   it('closes when the open chord’s column is hidden', () => {
-    const { store } = renderApp();
+    const { store } = renderAppOpenOnC();
     expect(screen.getByRole('dialog')).toBeInTheDocument();
     act(() => {
       store.dispatch(applyPreset('minor'));
@@ -137,7 +144,7 @@ describe('ChordPopover', () => {
   it('plays the chord on the selected instrument from the ▶ button', async () => {
     const user = userEvent.setup();
     const play = vi.spyOn(chordPlayer, 'play').mockImplementation(() => undefined);
-    renderApp();
+    renderAppOpenOnC();
     expect(play).not.toHaveBeenCalled();
     const dialog = screen.getByRole('dialog', { name: 'C' });
     await user.click(within(dialog).getByRole('button', { name: '▶ נגן' }));
@@ -159,7 +166,7 @@ describe('ChordPopover', () => {
   });
 
   it('renders in English', () => {
-    renderApp({ ...initialUiState, language: 'en' });
+    renderAppOpenOnC({ ...initialUiState, language: 'en' });
     const dialog = screen.getByRole('dialog', { name: 'C' });
     expect(within(dialog).getByText('major')).toBeInTheDocument();
     expect(within(dialog).getByRole('button', { name: 'Close' })).toBeInTheDocument();
