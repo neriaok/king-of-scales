@@ -5,12 +5,10 @@ import Header from '../components/Header';
 import Legend from '../components/Legend';
 import SequenceInput from '../components/SequenceInput';
 import { useDocumentLanguage } from '../hooks/useDocumentLanguage';
-import { useOpenFirstChordOnLoad } from '../hooks/useOpenFirstChordOnLoad';
 import styles from './App.module.css';
 
 const App: FC = () => {
   useDocumentLanguage();
-  useOpenFirstChordOnLoad();
 
   return (
     <div className={styles.app}>
